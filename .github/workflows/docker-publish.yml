@@ -1,0 +1,47 @@
+name: Publicar imagen Docker
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/alexisr-dev/frontend_logistica
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SHA corto
+        id: vars
+        run: echo "sha_short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Vite incrusta VITE_* al hacer el build, por eso van como build-args.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ steps.vars.outputs.sha_short }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL || 'https://logistica.alexissramirez.com/api/v1' }}
+            VITE_WS_URL=${{ vars.VITE_WS_URL || 'wss://logistica.alexissramirez.com' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
