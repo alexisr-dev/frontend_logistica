@@ -1,0 +1,91 @@
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-size: var(--texto-base);
+  line-height: var(--alto-lectura);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── Jerarquía tipográfica ────────────────────────────────────────────
+   Una sola definición por nivel: antes convivían 14 tamaños distintos
+   repartidos por los componentes. */
+h1 {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-fuerte);
+  line-height: var(--alto-apretado);
+}
+
+h2 {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  line-height: var(--alto-normal);
+}
+
+h3 {
+  font-size: var(--texto-md);
+  font-weight: var(--peso-medio);
+  line-height: var(--alto-normal);
+}
+
+/* ── Foco ─────────────────────────────────────────────────────────────
+   `:focus-visible` en vez de `:focus` para que el anillo aparezca al navegar
+   con teclado pero no al hacer clic con el ratón. */
+:focus-visible {
+  outline: var(--foco-ancho) solid var(--foco-color);
+  outline-offset: 2px;
+  border-radius: var(--radio-sm);
+}
+
+/* Sobre fondo primario el azul del anillo se pierde: se invierte. */
+.btn--primario:focus-visible,
+.menu__enlace:focus-visible,
+.menu__salir:focus-visible {
+  outline-color: var(--color-texto-inverso);
+}
+
+/* ── Utilidades ───────────────────────────────────────────────────── */
+
+/* Visible para lectores de pantalla, invisible en pantalla. Para los
+   `<caption>` de las tablas y las etiquetas de los iconos. */
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Movimiento ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

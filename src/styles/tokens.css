@@ -1,0 +1,108 @@
+:root {
+  /* ── Color · acción ─────────────────────────────────────────────── */
+  --color-primario: #2563eb;
+  --color-primario-hover: #1d4ed8;
+  --color-primario-activo: #1e40af;
+  /* Fondo de la opción seleccionada y de las filas marcadas. */
+  --color-primario-suave: #eff6ff;
+
+  /* ── Color · planos ─────────────────────────────────────────────── */
+  --color-fondo: #f1f5f9;
+  --color-superficie: #ffffff;
+  /* Segundo plano dentro de una tarjeta: explicadores, cabeceras de tabla. */
+  --color-superficie-alt: #f8fafc;
+
+  /* ── Color · texto ──────────────────────────────────────────────── */
+  --color-texto: #0f172a;
+  --color-texto-suave: #64748b;
+  --color-texto-inverso: #ffffff;
+
+  /* ── Color · líneas ─────────────────────────────────────────────── */
+  --color-borde: #e2e8f0;
+  /* Borde de controles: necesita 3:1 contra el fondo para ser accesible. */
+  --color-borde-fuerte: #94a3b8;
+
+  /* ── Color · estado ─────────────────────────────────────────────── */
+  --color-exito: #16a34a;
+  --color-alerta: #dc2626;
+  --color-aviso: #b45309;
+  --color-info: #0ea5e9;
+
+  /* ── Color · marca (menú lateral y acceso) ──────────────────────── */
+  --color-marca-oscuro: #1e3a8a;
+  --color-marca-medio: #1e40af;
+  /* Borde del degradado nocturno de la pantalla de acceso. */
+  --color-marca-noche: #0a1440;
+
+  /* ── Color · roles de usuario ───────────────────────────────────── */
+  --color-rol-cliente: #0ea5e9;
+  --color-rol-repartidor: #8b5cf6;
+  --color-rol-admin: #1e3a8a;
+
+  /* ── Color · estados de pedido y de ruta ────────────────────────── */
+  --color-estado-pendiente: #f59e0b;
+  --color-estado-confirmado: #3b82f6;
+  --color-estado-preparacion: #8b5cf6;
+  --color-estado-camino: #0ea5e9;
+  --color-estado-planificada: #6366f1;
+  --color-estado-neutro: #64748b;
+
+  /* ── Espaciado · base 4 ─────────────────────────────────────────── */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 20px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+  --esp-10: 40px;
+  --esp-12: 48px;
+
+  /* ── Tipografía ─────────────────────────────────────────────────── */
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --texto-xs: 12px;
+  --texto-sm: 13px;
+  --texto-base: 14px;
+  --texto-md: 16px;
+  --texto-lg: 18px;
+  --texto-xl: 24px;
+  --texto-dato: 32px;
+
+  --alto-apretado: 1.25;
+  --alto-normal: 1.4;
+  --alto-lectura: 1.55;
+
+  --peso-normal: 400;
+  --peso-medio: 600;
+  --peso-fuerte: 700;
+
+  /* ── Bordes y profundidad ───────────────────────────────────────── */
+  --radio-sm: 8px;   /* controles */
+  --radio: 12px;     /* tarjetas */
+  --radio-lg: 16px;  /* diálogos */
+  --radio-full: 999px;
+
+  --sombra: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sombra-flotante: 0 10px 25px rgba(15, 23, 42, 0.15);
+
+  /* ── Foco ───────────────────────────────────────────────────────── */
+  --foco-ancho: 2px;
+  --foco-color: var(--color-primario);
+
+  /* ── Medidas de layout ──────────────────────────────────────────── */
+  --ancho-menu: 240px;
+  --ancho-menu-compacto: 72px;
+  --ancho-contenido: 1280px;
+  /* Mínimo táctil recomendado; se aplica en móvil. */
+  --tactil-min: 44px;
+}
+
+/*
+ * Puntos de ruptura (los @media no admiten variables, se documentan aquí y se
+ * escriben literales en componentes.css):
+ *   móvil      hasta 767px
+ *   tablet     768px – 1023px
+ *   portátil   1024px – 1365px
+ *   escritorio 1366px en adelante
+ */
