@@ -8,7 +8,7 @@ import { EstadoCarga, EstadoVacio, EstadoError } from '../../../components/Estad
 import MapaRuta from './MapaRuta';
 import type { ParadaMapa } from './MapaRuta';
 import ComoFunciona from './ComoFunciona';
-import TiraRecorrido from './TiraRecorrido';
+import { horaDe, minutosDeRetraso, textoRetraso, useAhora } from '../../../utils/tiempo';
 
 const NOMBRE_ESTADO: Record<string, string> = {
   planificada: 'Planificada',
@@ -24,7 +24,7 @@ const NOMBRE_PARADA: Record<string, string> = {
 };
 
 const LEYENDA = [
-  { color: 'var(--color-estado-camino)', texto: 'Pendiente' },
+  { color: 'var(--color-amarillo)', texto: 'Pendiente' },
   { color: 'var(--color-exito)', texto: 'Entregada' },
   { color: 'var(--color-alerta)', texto: 'No se pudo entregar' },
 ];
@@ -57,6 +57,12 @@ function fechaLegible(iso: string): string {
   });
 }
 
+function fechaCorta(iso: string, ahora: Date): string {
+  const fecha = new Date(`${iso}T00:00:00`);
+  if (fecha.toDateString() === ahora.toDateString()) return 'Hoy';
+  return fecha.toLocaleDateString('es-PE', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
 function paradasDelMapa(ruta: Ruta): ParadaMapa[] {
   return ruta.paradas
     .filter((p) => typeof p.latitud === 'number' && typeof p.longitud === 'number')
@@ -69,15 +75,6 @@ function paradasDelMapa(ruta: Ruta): ParadaMapa[] {
     }));
 }
 
-function Dato({ etiqueta, valor }: { etiqueta: string; valor: string }) {
-  return (
-    <div>
-      <p className="kpi__titulo">{etiqueta}</p>
-      <p style={{ fontSize: 'var(--texto-lg)', fontWeight: 'var(--peso-medio)' }}>{valor}</p>
-    </div>
-  );
-}
-
 export default function RutasPage() {
   const [parametros] = useSearchParams();
   const [rutas, setRutas] = useState<Ruta[]>([]);
@@ -85,6 +82,7 @@ export default function RutasPage() {
   const [seleccionada, setSeleccionada] = useState<Ruta | null>(null);
   const [cargando, setCargando] = useState(true);
   const [fallo, setFallo] = useState(false);
+  const ahora = useAhora(60_000);
 
   const cargar = useCallback(() => {
     setCargando(true);
@@ -117,6 +115,12 @@ export default function RutasPage() {
   const paradas = seleccionada ? paradasDelMapa(seleccionada) : [];
   const sitiosDistintos = new Set(paradas.map((p) => `${p.lat},${p.lng}`)).size;
 
+  const ordenadas = seleccionada
+    ? [...seleccionada.paradas].sort((a, b) => a.orden_parada - b.orden_parada)
+    : [];
+  // La siguiente parada es la primera que sigue pendiente.
+  const siguiente = ordenadas.find((p) => p.estado_parada === 'pendiente');
+
   return (
     <div className="pila">
       <PageHeader
@@ -143,9 +147,12 @@ export default function RutasPage() {
         </Card>
       ) : rutas.length === 0 ? (
         <>
-          <Card>
+          <Card className="card--salidas">
+            <div className="card__cabecera">
+              <h2>Rutas</h2>
+              <span className="card__nota">0 recorridos</span>
+            </div>
             <EstadoVacio
-              icono="🗺️"
               titulo="Todavía no hay ninguna ruta planificada"
               detalle="Una ruta agrupa varios pedidos en un recorrido para un repartidor y un día."
               accion={
@@ -158,63 +165,65 @@ export default function RutasPage() {
           <ComoFunciona />
         </>
       ) : (
-        <>
-          <div style={{ display: 'flex', gap: 'var(--esp-2)', flexWrap: 'wrap' }}>
-            {rutas.map((r) => {
-              const activa = seleccionada?.id === r.id;
-              return (
-                <Boton
-                  key={r.id}
-                  type="button"
-                  variante={activa ? 'primario' : 'neutro'}
-                  aria-pressed={activa}
-                  onClick={() => setSeleccionada(r)}
-                >
-                  Ruta #{r.id} · {r.fecha} · {r.paradas.length} paradas
-                </Boton>
-              );
-            })}
-          </div>
+        <div className="dividido">
+          <Card>
+            <div className="card__cabecera">
+              <h2>Rutas</h2>
+              <span className="card__nota">
+                {rutas.length} {rutas.length === 1 ? 'recorrido' : 'recorridos'}
+              </span>
+            </div>
+            <ul className="rutas-lista">
+              {rutas.map((r) => (
+                <li key={r.id}>
+                  <button
+                    type="button"
+                    className="ruta-item"
+                    aria-pressed={seleccionada?.id === r.id}
+                    onClick={() => setSeleccionada(r)}
+                  >
+                    <span className="ruta-item__num">#{r.id}</span>
+                    <span>
+                      <span className="ruta-item__repartidor">{nombreRepartidor(r.repartidor)}</span>
+                      <span className="ruta-item__meta">
+                        {fechaCorta(r.fecha, ahora)} · {r.paradas.length}{' '}
+                        {r.paradas.length === 1 ? 'parada' : 'paradas'}
+                      </span>
+                      <BadgeEstado codigo={r.estado} nombre={NOMBRE_ESTADO[r.estado] ?? r.estado} />
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Card>
 
           {seleccionada && (
             <Card>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--esp-3)',
-                  flexWrap: 'wrap',
-                }}
-              >
+              <div className="card__cabecera">
                 <h2>Ruta #{seleccionada.id}</h2>
                 <BadgeEstado
                   codigo={seleccionada.estado}
                   nombre={NOMBRE_ESTADO[seleccionada.estado] ?? seleccionada.estado}
                 />
               </div>
-              <p className="page-header__subtitulo">
+              <p className="card__nota">
                 La reparte {nombreRepartidor(seleccionada.repartidor)} el{' '}
                 {fechaLegible(seleccionada.fecha)}.
               </p>
 
-              <div
-                className="rejilla-kpi"
-                style={{
-                  padding: 'var(--esp-4) 0',
-                  margin: 'var(--esp-4) 0',
-                  borderTop: '1px solid var(--color-borde)',
-                  borderBottom: '1px solid var(--color-borde)',
-                }}
-              >
-                <Dato etiqueta="Paradas" valor={String(seleccionada.paradas.length)} />
-                <Dato
-                  etiqueta="Distancia del recorrido"
-                  valor={distancia(seleccionada.distancia_total_km)}
-                />
-                <Dato
-                  etiqueta="Tiempo al volante"
-                  valor={duracion(seleccionada.tiempo_estimado_min)}
-                />
+              <div className="datos" style={{ padding: 'var(--esp-5) 0' }}>
+                <div>
+                  <span className="dato__valor">{seleccionada.paradas.length}</span>
+                  <span className="dato__etiqueta">Paradas</span>
+                </div>
+                <div>
+                  <span className="dato__valor">{distancia(seleccionada.distancia_total_km)}</span>
+                  <span className="dato__etiqueta">Distancia del recorrido</span>
+                </div>
+                <div>
+                  <span className="dato__valor">{duracion(seleccionada.tiempo_estimado_min)}</span>
+                  <span className="dato__etiqueta">Tiempo al volante</span>
+                </div>
               </div>
 
               {/* Una ruta puede guardarse «bien» y no llevar a ninguna parte: si
@@ -237,51 +246,80 @@ export default function RutasPage() {
                 </div>
               )}
 
-              <TiraRecorrido
-                puntos={paradas.map((p) => ({
-                  lat: p.lat,
-                  lng: p.lng,
-                  etiqueta: p.etiqueta.split(' · ').slice(1).join(' · ') || p.etiqueta,
-                  estado: p.estado,
-                }))}
-              />
+              <div className="ruta-cuerpo">
+                <div className="ruta-cuerpo__mapa">
+                  <MapaRuta geometria={seleccionada.geometria_ruta} paradas={paradas} />
+                  <ul className="leyenda">
+                    <li>Los números marcan el orden de visita.</li>
+                    {LEYENDA.map((l) => (
+                      <li key={l.texto}>
+                        <span
+                          className="leyenda__punto"
+                          style={{ background: l.color }}
+                          aria-hidden
+                        />
+                        {l.texto}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-              <div style={{ marginTop: 'var(--esp-4)' }}>
-                <MapaRuta geometria={seleccionada.geometria_ruta} paradas={paradas} />
+                <ol className="ruta-cuerpo__paradas paradas" aria-label="Paradas en orden de visita">
+                  {ordenadas.map((p) => {
+                    const esSiguiente = p.id === siguiente?.id;
+                    const retraso =
+                      esSiguiente ? minutosDeRetraso(p.hora_estimada, ahora) : null;
+                    const estadoPunto = esSiguiente
+                      ? 'siguiente'
+                      : p.estado_parada === 'pendiente'
+                        ? null
+                        : p.estado_parada;
+                    return (
+                      <li
+                        key={p.id}
+                        className={`paradas__item${esSiguiente ? ' paradas__item--siguiente' : ''}`}
+                      >
+                        <span className="paradas__hora">
+                          {horaDe(p.hora_real ?? p.hora_estimada)}
+                          {p.hora_real && p.hora_estimada && (
+                            <small>est. {horaDe(p.hora_estimada)}</small>
+                          )}
+                          {retraso !== null && (
+                            <small className="hora__retraso">{textoRetraso(retraso)}</small>
+                          )}
+                        </span>
+                        <span>
+                          <i
+                            className={`paradas__punto${
+                              estadoPunto ? ` paradas__punto--${estadoPunto}` : ''
+                            }`}
+                          />
+                        </span>
+                        <div className="paradas__cuerpo">
+                          <div className="paradas__titulo">
+                            <b>{p.codigo_seguimiento}</b>
+                            <span
+                              className={`paradas__estado${
+                                p.estado_parada === 'fallido' ? ' paradas__estado--fallido' : ''
+                              }`}
+                            >
+                              {esSiguiente
+                                ? 'Siguiente parada'
+                                : NOMBRE_PARADA[p.estado_parada] ?? p.estado_parada}
+                            </span>
+                          </div>
+                          <p className="paradas__direccion">
+                            {[p.direccion, p.distrito].filter(Boolean).join(' · ') || 'Sin dirección'}
+                          </p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
               </div>
-
-              <ul className="leyenda">
-                <li>Los números marcan el orden de visita.</li>
-                {LEYENDA.map((l) => (
-                  <li key={l.texto}>
-                    <span
-                      className="leyenda__punto"
-                      style={{ background: l.color }}
-                      aria-hidden
-                    />
-                    {l.texto}
-                  </li>
-                ))}
-              </ul>
-
-              <ol className="paradas">
-                {seleccionada.paradas.map((p) => (
-                  <li key={p.id} className="paradas__item">
-                    <span className="paradas__orden">{p.orden_parada}</span>
-                    <strong>{p.codigo_seguimiento}</strong>
-                    <BadgeEstado
-                      codigo={p.estado_parada}
-                      nombre={NOMBRE_PARADA[p.estado_parada] ?? p.estado_parada}
-                    />
-                    <span style={{ color: 'var(--color-texto-suave)', fontSize: 'var(--texto-sm)' }}>
-                      {[p.direccion, p.distrito].filter(Boolean).join(' · ') || 'Sin dirección'}
-                    </span>
-                  </li>
-                ))}
-              </ol>
             </Card>
           )}
-        </>
+        </div>
       )}
     </div>
   );

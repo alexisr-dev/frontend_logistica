@@ -57,20 +57,20 @@ Una operación de reparto necesita responder tres preguntas: **en qué estado es
 - Rutas privadas y guard de **administrador** (`RutaAdmin`) para la sección de usuarios.
 
 **Dashboard**
-- Tarjetas con total de pedidos, entregados, en camino y cancelados.
-- Ranking de eficiencia de repartidores y tabla con los últimos pedidos.
+- «El día»: una banda proporcional con entregados, en camino, por salir y cancelados.
+- Ranking de eficiencia de repartidores y los pedidos del día separados en **Salidas** y **Llegadas**.
 
 **Pedidos**
-- Listado con código de seguimiento, cliente, repartidor, estado y fecha.
+- Listado como cuadro de salidas: **Salidas** (lo que todavía sale, ordenado por hora estimada, con el retraso en minutos) y **Llegadas** (entregado, cancelado, devuelto). Cada fila lleva código de seguimiento, cliente, destino, repartidor, estado y fecha.
 - **Alta de pedido**: cliente, repartidor opcional, peso, costo y fecha estimada. Origen y destino se eligen **buscando la dirección** (geocodificación con Nominatim) o **marcando el punto en el mapa** (geocodificación inversa).
 - **Detalle**: reasignación de repartidor, cambio de estado limitado a las `transiciones_permitidas` que devuelve la API (con comentario opcional), línea de tiempo del historial y mapa de seguimiento en vivo.
 
 **Rutas**
 - Planificación: repartidor, día y pedidos marcados **en el orden de visita**. El formulario exige al menos 2 pedidos con destinos distintos, excluye pedidos en estado final y bloquea los que ya van en otra ruta planificada o en curso.
-- Visualización: distancia y tiempo estimados, recorrido (polyline) y marcadores numerados por parada, coloreados según su estado (pendiente, entregada, fallida).
+- Visualización: distancia y tiempo estimados, recorrido (polyline), marcadores numerados por parada según su estado (pendiente, entregada, fallida) y la lista de paradas con su hora estimada y real; la siguiente parada va resaltada.
 
 **Reportes**
-- Ranking de repartidores por **porcentaje de entregas a tiempo**, con indicador de severidad (≥ 90 %, ≥ 70 %, menor), calificación promedio y tiempo medio.
+- Ranking de repartidores por **porcentaje de entregas a tiempo**, con la meta del 90 % marcada en cada pista, indicador de severidad (≥ 90 %, ≥ 70 %, menor), calificación promedio y tiempo medio.
 
 **Usuarios** (solo administradores)
 - Alta, edición y baja de cuentas de cualquier rol; búsqueda con *debounce*, filtros por rol y estado, paginación y diálogo de confirmación.
@@ -79,8 +79,10 @@ Una operación de reparto necesita responder tres preguntas: **en qué estado es
 
 **Experiencia de uso**
 - Estados de carga, vacío y error con botón de reintento en las pantallas de datos.
-- Diseño adaptable: el menú lateral pasa a cajón en pantallas pequeñas (puntos de corte en 768 px y 1024 px).
-- Accesibilidad: diálogo modal con foco atrapado y cierre con `Esc`, etiquetas `aria-*` y respeto a `prefers-reduced-motion`.
+- **Dirección visual «Horario»**: se lee como el cuadro de salidas de una estación. Amarillo = lo que todavía sale o se puede hacer; blanco = lo ya cerrado; tinta negra para texto, barra y reglas. El estado de un pedido se dice con forma y palabra (cinco cuadrados que se llenan + su nombre), no solo con color. Tipografía Archivo de ancho variable (condensada en horas y títulos), interfaz recta (0–4 px de radio), sin sombras ni tarjetas anidadas, y un reloj en la barra.
+- Diseño adaptable: la barra superior pasa a una hoja negra a pantalla completa en móvil y cada fila de pedido se compone como un billete, con la hora a la izquierda (puntos de corte en 768 px y 1100 px).
+- Accesibilidad: diálogo modal con foco atrapado y cierre con `Esc`, etiquetas `aria-*` y respeto a `prefers-reduced-motion`. El movimiento se limita a `transform` y `opacity` y casi nada pasa de 200 ms.
+- **Cuenta de demostración** en la pantalla de acceso (correo y contraseña con botón «Copiar» y «Entrar con esta cuenta»), pensada para que quien revise el proyecto entre sin buscar credenciales. Se oculta con `VITE_MOSTRAR_DEMO=false`.
 
 ---
 
@@ -220,8 +222,9 @@ Vite solo expone al cliente las variables con prefijo `VITE_`, y **sus valores q
 |---|:---:|---|---|
 | `VITE_API_URL` | No | `http://localhost:8000/api/v1` | URL base de la API REST |
 | `VITE_WS_URL` | No | `ws://localhost:8000` | Origen del servidor WebSocket (sin ruta; el panel añade `/ws/tracking/<id>/`) |
+| `VITE_MOSTRAR_DEMO` | No | (mostrar) | Con el valor `false` oculta la cuenta de demostración de la pantalla de acceso. Úsalo en un despliegue donde no hayas ejecutado `seed_demo` |
 
-Ambas tienen el mismo valor por defecto dentro del código, así que el `.env` solo es necesario si el backend vive en otra dirección. Al cambiarlas hay que reiniciar `npm run dev` (o volver a ejecutar `npm run build`).
+Las dos primeras tienen el mismo valor por defecto dentro del código, así que el `.env` solo es necesario si el backend vive en otra dirección. Al cambiarlas hay que reiniciar `npm run dev` (o volver a ejecutar `npm run build`).
 
 ---
 
@@ -321,26 +324,26 @@ frontend_logistica/
 ├── package.json
 ├── vite.config.ts            # plugin de React y puerto 5173
 ├── tsconfig.json
-├── .env.example              # VITE_API_URL, VITE_WS_URL
+├── .env.example              # VITE_API_URL, VITE_WS_URL, VITE_MOSTRAR_DEMO
 └── src/
     ├── main.tsx              # Provider de Redux, BrowserRouter y estilos de Leaflet
     ├── app/                  # App, routes (guards), store y hooks tipados
     ├── features/
     │   ├── auth/             # login, recuperar contraseña, authSlice, authApi
-    │   ├── dashboard/        # AdminDashboard con KPIs
+    │   ├── dashboard/        # AdminDashboard: el día en cifras, salidas/llegadas y eficiencia
     │   ├── pedidos/          # tabla, detalle, formulario, pedidosSlice, pedidosApi
     │   ├── rutas/            # listado, planificación, MapaRuta, TiraRecorrido, rutasApi
     │   ├── tracking/         # MapaTiempoReal y hook useWebSocketTracking
     │   ├── reportes/         # GraficoEficiencia (ranking) y reportesApi
     │   └── usuarios/         # CRUD, selectores de dirección/ubicación y usuariosApi
-    ├── components/           # UI compartida: ui.tsx (Card, Boton, Campo…), Tabla, Kpi,
+    ├── components/           # UI compartida: ui.tsx (Card, Boton, Campo, BadgeEstado…), Tabla,
     │                         # Paginacion, Estados, DialogoConfirmacion, CapaBase, Iconos,
-    │                         # CiudadReparto (ilustración SVG de la pantalla de acceso)
-    ├── layouts/              # AdminLayout (menú lateral / cajón móvil)
+    │                         # marcadores (iconos de mapa) y PanelHorario (lado amarillo del acceso)
+    ├── layouts/              # AdminLayout (barra superior / hoja negra en móvil)
     ├── services/             # apiClient (Axios + JWT) y geocoding (Nominatim)
     ├── styles/               # tokens.css, base.css, componentes.css
     ├── types/                # Tipos del dominio (Usuario, Pedido, Ruta…)
-    └── utils/                # decodePolyline, mensajeDeError
+    └── utils/                # decodePolyline, mensajeDeError, tiempo (horas, retraso y reloj)
 ```
 
 ---

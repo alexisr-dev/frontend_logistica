@@ -1,308 +1,239 @@
 
-/* ═══ Layout ═══════════════════════════════════════════════════════ */
+/* ═══ Layout: barra superior + contenido a todo el ancho ═══════════
+   Las secciones son pestañas de una barra negra y la activa se pinta de
+   amarillo. Sin menú lateral: el ancho que sobraba es para las tablas. */
 
 .layout {
-  display: flex;
   min-height: 100vh;
 }
 
-.contenido {
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--alto-barra);
+  display: flex;
+  align-items: stretch;
+  gap: var(--esp-8);
+  padding: 0 var(--esp-8);
+  background: var(--color-tinta);
+  color: var(--color-texto-inverso);
+}
+
+.barra__marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 80%;
+}
+
+.barra__logo {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--color-amarillo);
+  color: var(--color-tinta);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.barra__menu {
+  display: none;
+}
+
+.barra__nav {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.barra__enlace {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-weight: 500;
+  color: #e4e6e8;
+  white-space: nowrap;
+  transition: background-color 0.12s ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .barra__enlace:hover {
+    background: #2c2b27;
+  }
+}
+
+.barra__enlace--activo,
+.barra__enlace--activo:hover {
+  background: var(--color-amarillo);
+  color: var(--color-tinta);
+  font-weight: var(--peso-medio);
+}
+
+.barra__enlace--activo:focus-visible {
+  outline-color: var(--color-tinta);
+  outline-offset: -5px;
+}
+
+.barra__cuenta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: var(--texto-sm);
+  color: #c9ccd0;
+  white-space: nowrap;
+}
+
+.barra__salir {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 0;
+  color: var(--color-texto-inverso);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 8px 4px;
+}
+
+.barra__hora {
+  align-self: center;
+  font-size: 22px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  letter-spacing: 0.01em;
+}
+
+.contenido {
+  padding: var(--esp-8) var(--esp-8) 80px;
   /* Sin esto, una tabla ancha estira el flex y desborda la página entera. */
   min-width: 0;
-  padding: var(--esp-8);
   overflow-x: hidden;
 }
 
 .contenido__interior {
-  /* En un monitor de 1920 las líneas llegaban a 200 caracteres. */
   max-width: var(--ancho-contenido);
   margin: 0 auto;
+  animation: entrar 0.2s var(--ease-salida) both;
 }
 
-/* ═══ Menú lateral ═════════════════════════════════════════════════ */
-
-.menu {
-  width: var(--ancho-menu);
-  flex: 0 0 var(--ancho-menu);
-  background: linear-gradient(180deg, var(--color-marca-oscuro) 0%, var(--color-marca-medio) 100%);
-  color: var(--color-texto-inverso);
-  padding: var(--esp-6) var(--esp-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-8);
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
-.menu__marca {
-  font-size: var(--texto-xl);
-  display: flex;
-  align-items: center;
-  gap: var(--esp-3);
-  padding-bottom: var(--esp-5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.menu__marca-titulo {
-  display: block;
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-fuerte);
-  line-height: 1.2;
-}
-
-.menu__marca-sub {
-  display: block;
-  font-size: var(--texto-xs);
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* ── Navegación como ruta ────────────────────────────────────────────
-   Cada sección es una parada sobre una línea, el mismo lenguaje que
-   TiraRecorrido usa para el orden de visita de una ruta real. No se estira
-   a toda la altura: forzarla dejaba un hueco azul enorme antes del pie en
-   un cajón de móvil con solo 5 secciones. */
-.menu__nav {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-1);
-}
-
-.menu__nav::before {
-  content: '';
-  position: absolute;
-  left: 21px;
-  top: 22px;
-  bottom: 22px;
-  width: 2px;
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.menu__enlace {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--esp-3);
-  padding: var(--esp-2) var(--esp-3);
-  border-radius: var(--radio-sm);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: var(--texto-base);
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.menu__enlace:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-texto-inverso);
-}
-
-.menu__parada {
-  flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radio-full);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
-  color: inherit;
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.menu__enlace--activo {
-  color: var(--color-texto-inverso);
-  font-weight: var(--peso-medio);
-}
-
-.menu__enlace--activo .menu__parada {
-  background: var(--color-texto-inverso);
-  border-color: var(--color-texto-inverso);
-  color: var(--color-marca-oscuro);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
-}
-
-/* ── Pie: cuenta y salida ────────────────────────────────────────────
-   `margin-top: auto` (no un `.menu__nav` estirado) es lo que ancla el pie
-   abajo: dentro de un cajón corto queda pegado a la nav, con solo el aire
-   que sobra realmente debajo, no medio cajón de azul vacío. */
-.menu__pie {
-  margin-top: auto;
-  padding-top: var(--esp-5);
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-4);
-}
-
-.menu__cuenta {
-  display: flex;
-  align-items: center;
-  gap: var(--esp-3);
-  min-width: 0;
-}
-
-.menu__avatar {
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radio-full);
-  background: rgba(255, 255, 255, 0.14);
-  display: grid;
-  place-items: center;
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-fuerte);
-}
-
-.menu__cuenta-nombre {
-  display: block;
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.menu__cuenta-rol {
-  display: block;
-  font-size: var(--texto-xs);
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.menu__salir {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--esp-2);
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--color-texto-inverso);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  padding: var(--esp-2) var(--esp-3);
-  border-radius: var(--radio-sm);
-  font-size: var(--texto-sm);
-}
-
-.menu__salir:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-/* Barra superior y velo: solo existen en móvil. */
-.barra-movil {
-  display: none;
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  align-items: center;
-  gap: var(--esp-3);
-  padding: var(--esp-2) var(--esp-4);
-  background: var(--color-marca-oscuro);
-  color: var(--color-texto-inverso);
-}
-
-.barra-movil__boton {
-  display: grid;
-  place-items: center;
-  width: var(--tactil-min);
-  height: var(--tactil-min);
-  background: transparent;
-  border: none;
-  color: var(--color-texto-inverso);
-  font-size: var(--texto-lg);
-  border-radius: var(--radio-sm);
-}
-
-.velo {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 45;
-  background: rgba(15, 23, 42, 0.5);
-}
-
-/* Tablet: el menú se reduce a iconos para devolver ancho al contenido. */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .menu {
-    width: var(--ancho-menu-compacto);
-    flex-basis: var(--ancho-menu-compacto);
-    padding: var(--esp-6) var(--esp-2);
-    align-items: center;
+/* Tablet: la cuenta pierde el nombre; queda «Salir». */
+@media (max-width: 1099px) {
+  .barra {
+    gap: var(--esp-5);
+    padding: 0 var(--esp-4);
   }
 
-  .menu__etiqueta {
+  .barra__enlace {
+    padding: 0 12px;
+  }
+
+  .barra__usuario {
     display: none;
   }
-
-  .menu__marca {
-    flex-direction: column;
-    gap: var(--esp-1);
-    border-bottom: none;
-    padding-bottom: 0;
-    font-size: var(--texto-xl);
-  }
-
-  /* El rail de iconos no tiene ancho para la línea de la ruta: la marca de
-     activo en cada parada basta para saber cuál es la sección actual. */
-  .menu__nav::before {
-    display: none;
-  }
-
-  .menu__enlace {
-    justify-content: center;
-    width: var(--tactil-min);
-    height: var(--tactil-min);
-    padding: 0;
-  }
-
-  .menu__cuenta {
-    justify-content: center;
-  }
-
-  .menu__salir {
-    padding: var(--esp-2);
-  }
-
-  .contenido {
-    padding: var(--esp-6);
-  }
 }
 
-/* Móvil: el menú sale del flujo y se abre como cajón. */
+/* Móvil: el menú es una hoja negra a pantalla completa, con las secciones
+   en grande para tocarlas con el pulgar. */
 @media (max-width: 767px) {
-  .layout {
-    display: block;
+  .barra {
+    gap: 0;
+    padding: 0 var(--esp-3) 0 0;
   }
 
-  .barra-movil {
-    display: flex;
+  .barra__menu {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 52px;
+    background: transparent;
+    border: 0;
+    color: var(--color-texto-inverso);
   }
 
-  .menu {
+  .barra__marca {
+    flex: 1;
+    font-size: 19px;
+  }
+
+  .barra__hora {
+    font-size: 21px;
+  }
+
+  .barra__nav {
     position: fixed;
-    top: 0;
+    top: var(--alto-barra);
+    right: 0;
     bottom: 0;
     left: 0;
     z-index: 50;
-    width: 82vw;
-    max-width: 300px;
-    transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    flex-direction: column;
+    gap: 0;
+    padding-top: var(--esp-4);
     overflow-y: auto;
+    background: var(--color-tinta);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 0.24s var(--ease-hoja),
+      visibility 0s linear 0.24s;
   }
 
-  .menu--abierto {
-    transform: translateX(0);
+  .barra__nav--abierto {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform 0.24s var(--ease-hoja),
+      visibility 0s;
   }
 
-  .menu--abierto ~ .velo,
-  .velo--visible {
+  .barra__enlace {
+    height: 68px;
+    padding: 0 var(--esp-5);
+    font-size: 34px;
+    font-weight: var(--peso-fuerte);
+    font-stretch: 75%;
+  }
+
+  .barra__cuenta {
+    margin: auto 0 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--esp-3);
+    padding: var(--esp-4) var(--esp-5) var(--esp-6);
+    border-top: 1px solid #34322c;
+  }
+
+  .barra__usuario {
     display: block;
+    color: #c9ccd0;
   }
 
-  .menu__enlace {
-    min-height: var(--tactil-min);
+  .barra__salir {
+    justify-content: center;
+    min-height: 48px;
+    border-radius: var(--radio-sm);
+    box-shadow: inset 0 0 0 1.5px var(--color-texto-inverso);
+    text-decoration: none;
   }
 
   .contenido {
-    padding: var(--esp-4);
+    padding: var(--esp-5) var(--esp-4) 56px;
   }
 }
 
@@ -311,18 +242,47 @@
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--esp-4);
+  align-items: flex-end;
+  gap: var(--esp-6);
   flex-wrap: wrap;
 }
 
 .page-header__subtitulo {
-  font-size: var(--texto-base);
+  font-size: var(--texto-md);
   color: var(--color-texto-suave);
-  margin-top: var(--esp-1);
+  margin-top: var(--esp-2);
+}
+
+.titulo-pedido {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-5);
+  flex-wrap: wrap;
+  font-size: 56px;
 }
 
 @media (max-width: 767px) {
+  .titulo-pedido {
+    font-size: 38px;
+    gap: var(--esp-3);
+  }
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: var(--esp-3);
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  h1 {
+    font-size: 34px;
+  }
+
   .page-header__acciones {
     width: 100%;
   }
@@ -332,24 +292,48 @@
   }
 }
 
-/* ═══ Tarjeta ══════════════════════════════════════════════════════ */
+/* ═══ Bloque (antes «tarjeta») ═════════════════════════════════════
+   Una superficie plana con una regla negra de 4 px arriba. Nada de borde,
+   sombra ni esquinas redondeadas: la jerarquía la dan el color y la regla.
+   El amarillo (`card--salidas`) es lo que todavía sale o se puede hacer. */
 
 .card {
   background: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio);
-  box-shadow: var(--sombra);
-  padding: var(--esp-5);
+  border-top: 4px solid var(--color-tinta);
+  padding: var(--esp-4) var(--esp-6) var(--esp-6);
+}
+
+.card--salidas {
+  background: var(--color-amarillo);
 }
 
 .card--plano {
   background: var(--color-superficie-alt);
-  box-shadow: none;
+  border-top: 0;
+  padding: var(--esp-4) var(--esp-5);
+}
+
+.card__cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--esp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--esp-3);
+}
+
+.card__nota {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+
+.card--salidas .card__nota {
+  color: var(--color-tinta);
 }
 
 @media (max-width: 767px) {
   .card {
-    padding: var(--esp-4);
+    padding: var(--esp-3) var(--esp-4) var(--esp-5);
   }
 }
 
@@ -360,33 +344,51 @@
   align-items: center;
   justify-content: center;
   gap: var(--esp-2);
-  padding: var(--esp-3) var(--esp-5);
+  min-height: 40px;
+  padding: 0 var(--esp-5);
   border-radius: var(--radio-sm);
-  border: 1px solid transparent;
+  border: 0;
   font-size: var(--texto-base);
   font-weight: var(--peso-medio);
   font-family: inherit;
   line-height: 1.2;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.14s var(--ease-salida),
+    background-color 0.12s ease-out;
 }
 
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* La acción principal es amarilla con tinta. Una por vista. */
 .btn--primario {
-  background: var(--color-primario);
-  color: var(--color-texto-inverso);
+  background: var(--color-amarillo);
+  color: var(--color-tinta);
 }
 
 .btn--primario:hover:not(:disabled) {
+  background: var(--color-amarillo-hover);
+}
+
+/* Sobre el bloque amarillo la acción pasa a negro. */
+.card--salidas .btn--primario {
+  background: var(--color-tinta);
+  color: var(--color-texto-inverso);
+}
+
+.card--salidas .btn--primario:hover:not(:disabled) {
   background: var(--color-primario-hover);
 }
 
 .btn--neutro {
-  background: var(--color-superficie);
-  color: var(--color-texto);
-  border-color: var(--color-borde-fuerte);
+  background: transparent;
+  color: var(--color-tinta);
+  box-shadow: inset 0 0 0 1.5px var(--color-tinta);
 }
 
 .btn--neutro:hover:not(:disabled) {
-  background: var(--color-superficie-alt);
+  background: rgba(20, 19, 15, 0.07);
 }
 
 .btn--peligro {
@@ -395,36 +397,57 @@
 }
 
 .btn--peligro:hover:not(:disabled) {
-  background: #b91c1c;
+  background: #8f0920;
 }
 
 /* Acción terciaria dentro de una fila: se lee como enlace, actúa como botón. */
 .btn--texto,
 .btn--texto-peligro {
   background: none;
-  border: none;
+  min-height: 0;
   padding: var(--esp-1) var(--esp-2);
-  color: var(--color-primario);
+  color: var(--color-tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.btn--texto:hover:not(:disabled),
-.btn--texto-peligro:hover:not(:disabled) {
-  text-decoration: underline;
+.btn--texto:hover:not(:disabled) {
+  background: rgba(20, 19, 15, 0.07);
 }
 
 .btn--texto-peligro {
   color: var(--color-alerta);
 }
 
-/* `disabled` no se comunica solo con opacidad: también con cursor y borde. */
+.btn--texto-peligro:hover:not(:disabled) {
+  background: rgba(176, 11, 39, 0.08);
+}
+
+/* `disabled` no se comunica solo con color: también con cursor y forma. */
 .btn:disabled {
-  opacity: 0.55;
+  background: var(--color-borde);
+  color: var(--color-texto-tenue);
+  box-shadow: none;
   cursor: not-allowed;
-  border-color: var(--color-borde);
+}
+
+.btn--texto:disabled,
+.btn--texto-peligro:disabled {
+  background: none;
+}
+
+.card--salidas .btn:disabled {
+  background: rgba(20, 19, 15, 0.14);
+  color: #3a382f;
 }
 
 @media (max-width: 767px) {
   .btn {
+    min-height: 48px;
+  }
+
+  .btn--texto,
+  .btn--texto-peligro {
     min-height: var(--tactil-min);
   }
 }
@@ -444,29 +467,59 @@
 
 .campo__ayuda {
   font-size: var(--texto-xs);
-  color: var(--color-texto-suave);
+  color: var(--color-texto-tenue);
   line-height: var(--alto-normal);
+}
+
+.card--salidas .campo__ayuda {
+  color: #2b2a24;
 }
 
 .control {
   width: 100%;
-  padding: var(--esp-3);
+  min-height: 44px;
+  padding: 0 var(--esp-3);
+  border: 0;
   border-radius: var(--radio-sm);
-  border: 1px solid var(--color-borde-fuerte);
-  font-size: var(--texto-base);
+  box-shadow: inset 0 0 0 1px var(--color-borde-fuerte);
+  font-size: 15px;
   font-family: inherit;
   background: var(--color-superficie);
   color: var(--color-texto);
+  transition: box-shadow 0.12s ease-out;
+}
+
+.card--salidas .control {
+  box-shadow: inset 0 0 0 1px var(--color-tinta);
+}
+
+/* Foco: tinta de 2 px por dentro y un halo amarillo (blanco sobre amarillo). */
+.control:focus-visible {
+  outline: 0;
+  box-shadow:
+    inset 0 0 0 2px var(--color-tinta),
+    0 0 0 3px var(--color-amarillo);
+}
+
+.card--salidas .control:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px var(--color-tinta),
+    0 0 0 3px var(--color-superficie);
 }
 
 .control:disabled {
-  background: var(--color-superficie-alt);
-  color: var(--color-texto-suave);
+  background: #f1f2f3;
+  color: var(--color-texto-tenue);
+  box-shadow: inset 0 0 0 1px var(--color-borde);
   cursor: not-allowed;
 }
 
 .control::placeholder {
-  color: var(--color-texto-suave);
+  color: var(--color-texto-tenue);
+}
+
+select.control {
+  padding-right: var(--esp-2);
 }
 
 /* Campo de contraseña con botón para revelarla. */
@@ -475,40 +528,131 @@
 }
 
 .campo-clave .control {
-  padding-right: calc(var(--esp-8) + var(--esp-1));
+  padding-right: 48px;
 }
 
 .campo-clave__alternar {
   position: absolute;
-  top: 50%;
-  right: var(--esp-2);
-  transform: translateY(-50%);
+  top: 2px;
+  right: 2px;
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   background: none;
-  border: none;
+  border: 0;
   border-radius: var(--radio-sm);
   color: var(--color-texto-suave);
 }
 
 .campo-clave__alternar:hover {
   color: var(--color-texto);
-  background: var(--color-superficie-alt);
+  background: rgba(20, 19, 15, 0.06);
 }
 
-/* Rejilla de formulario: dos columnas que colapsan solas. */
+/* Código de un solo uso: dígitos grandes y espaciados. */
+.codigo {
+  min-height: 60px;
+  font-size: 34px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  letter-spacing: 0.35em;
+  padding-left: var(--esp-4);
+}
+
+/* Interruptor: el checkbox de siempre, dibujado como pista y botón. */
+.interruptor {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  cursor: pointer;
+  position: relative;
+}
+
+.interruptor input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.interruptor__pista {
+  position: relative;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 28px;
+  margin-top: 1px;
+  background: #b9bec3;
+  border-radius: 2px;
+  transition: background-color 0.15s ease-out;
+}
+
+.interruptor__pista::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: var(--color-superficie);
+  transition: transform 0.18s var(--ease-salida), background-color 0.15s ease-out;
+}
+
+.interruptor input:checked + .interruptor__pista {
+  background: var(--color-tinta);
+}
+
+.interruptor input:checked + .interruptor__pista::after {
+  transform: translateX(20px);
+  background: var(--color-amarillo);
+}
+
+.interruptor input:focus-visible + .interruptor__pista {
+  outline: var(--foco-ancho) solid var(--color-tinta);
+  outline-offset: 2px;
+}
+
+.interruptor__texto {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Rejilla de formulario: columnas que colapsan solas. */
 .rejilla {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--esp-4);
+  gap: var(--esp-5) var(--esp-6);
 }
 
 .barra-acciones {
   display: flex;
   gap: var(--esp-3);
   flex-wrap: wrap;
+}
+
+.barra-acciones--fin {
+  justify-content: flex-end;
+}
+
+/* Formulario de dos bloques: la persona a la izquierda, el acceso al lado. */
+.columnas--formulario {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+}
+
+@media (max-width: 1099px) {
+  .columnas--formulario {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.rejilla--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 767px) {
+  .rejilla--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 767px) {
@@ -521,44 +665,135 @@
   }
 }
 
-/* ═══ Pastilla de estado ═══════════════════════════════════════════ */
+/* ═══ Estado y etiquetas ═══════════════════════════════════════════ */
 
-/* El color llega en `--badge-color` como referencia a un token, así que la
-   paleta sigue viviendo solo en tokens.css y no se repite en el TSX. */
+/* Estado de un pedido: cinco cuadrados que se llenan y el nombre al lado.
+   La información vive en la forma y en la palabra, no en el matiz. */
+.estado-pedido {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cuadros {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.cuadros i {
+  width: 9px;
+  height: 9px;
+  background: rgba(20, 19, 15, 0.2);
+  transition: background-color 0.12s ease-out;
+}
+
+.cuadros i.on {
+  background: var(--color-tinta);
+}
+
+.cuadros.cuadros--ok i {
+  background: var(--color-exito);
+}
+
+.estado-pedido__x {
+  width: 19px;
+  text-align: center;
+  color: var(--color-alerta);
+  font-weight: var(--peso-fuerte);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.estado-pedido--cancelado {
+  color: var(--color-alerta);
+  font-weight: var(--peso-fuerte);
+}
+
+/* Dentro de un título (h1) hereda la condensada en negrita: se restablece. */
+.estado-pedido--grande {
+  font-size: var(--texto-md);
+  font-weight: 500;
+  font-stretch: 100%;
+  letter-spacing: 0;
+}
+
+.estado-pedido--grande .cuadros i {
+  width: 11px;
+  height: 11px;
+}
+
+/* Marcador cuadrado + palabra: roles, estados de ruta y de parada. */
 .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  background: var(--badge-color, var(--color-estado-neutro));
+  box-shadow: inset 0 0 0 2px var(--color-tinta);
+}
+
+/* Etiqueta cuadrada: solo donde hay que llamar la atención («Sin asignar», «Tú»). */
+.etiqueta {
   display: inline-block;
-  padding: var(--esp-1) var(--esp-3);
-  border-radius: var(--radio-full);
+  padding: 1px var(--esp-2);
+  border-radius: 2px;
+  background: var(--color-tinta);
+  color: var(--color-amarillo);
   font-size: var(--texto-xs);
   font-weight: var(--peso-medio);
   white-space: nowrap;
-  color: var(--badge-color, var(--color-texto-suave));
-  background: color-mix(in srgb, var(--badge-color, var(--color-texto-suave)) 12%, transparent);
+}
+
+.etiqueta--tu {
+  color: var(--color-texto-inverso);
+  margin-left: var(--esp-2);
 }
 
 /* ═══ Aviso ════════════════════════════════════════════════════════ */
 
 .aviso {
-  padding: var(--esp-3) var(--esp-4);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: var(--esp-3) 14px;
   border-radius: var(--radio-sm);
-  font-size: var(--texto-sm);
+  font-size: var(--texto-base);
+  font-weight: 500;
   line-height: var(--alto-normal);
-  border-left: 3px solid currentColor;
+  animation: entrar 0.2s var(--ease-salida) both;
+}
+
+.aviso svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
 }
 
 .aviso--error {
-  background: rgba(220, 38, 38, 0.08);
-  color: var(--color-alerta);
+  background: #fbe4e7;
+  color: #7a0719;
 }
 
 .aviso--exito {
-  background: rgba(22, 163, 74, 0.08);
-  color: var(--color-exito);
+  background: #ddf1e4;
+  color: #064b24;
 }
 
 .aviso--atencion {
-  background: rgba(180, 83, 9, 0.08);
-  color: var(--color-aviso);
+  background: #fdecd0;
+  color: #5e3000;
 }
 
 /* ═══ Tabla ════════════════════════════════════════════════════════ */
@@ -575,20 +810,59 @@
 
 .tabla th {
   text-align: left;
-  padding: var(--esp-2) var(--esp-3);
+  padding: var(--esp-2) var(--esp-3) var(--esp-2) 0;
   font-size: var(--texto-xs);
   font-weight: var(--peso-medio);
   color: var(--color-texto-suave);
   white-space: nowrap;
+  border-bottom: 2px solid var(--color-tinta);
 }
 
 .tabla td {
-  padding: var(--esp-3);
-  border-top: 1px solid var(--color-borde);
+  height: 52px;
+  padding: var(--esp-3) var(--esp-3) var(--esp-3) 0;
+  border-bottom: 1px solid var(--color-borde);
+  vertical-align: middle;
 }
 
-.tabla__fila--atenuada {
-  opacity: 0.55;
+.tabla th:last-child,
+.tabla td:last-child {
+  padding-right: 0;
+}
+
+.tabla tbody tr {
+  transition: background-color 0.12s ease-out;
+  animation: entrar 0.16s var(--ease-salida) both;
+}
+
+.tabla tbody tr:nth-child(2) { animation-delay: 24ms; }
+.tabla tbody tr:nth-child(3) { animation-delay: 48ms; }
+.tabla tbody tr:nth-child(4) { animation-delay: 72ms; }
+.tabla tbody tr:nth-child(5) { animation-delay: 96ms; }
+.tabla tbody tr:nth-child(6) { animation-delay: 120ms; }
+.tabla tbody tr:nth-child(7) { animation-delay: 144ms; }
+.tabla tbody tr:nth-child(n + 8) { animation-delay: 168ms; }
+
+@media (hover: hover) and (pointer: fine) {
+  .tabla tbody tr:hover {
+    background: var(--color-superficie-alt);
+  }
+
+  .card--salidas .tabla tbody tr:hover {
+    background: var(--color-amarillo-hover);
+  }
+}
+
+.card--salidas .tabla th {
+  color: var(--color-tinta);
+}
+
+.card--salidas .tabla td {
+  border-bottom-color: rgba(20, 19, 15, 0.18);
+}
+
+.tabla__fila--atenuada td {
+  color: var(--color-texto-tenue);
 }
 
 .tabla__acciones {
@@ -596,8 +870,85 @@
   white-space: nowrap;
 }
 
-/* En móvil cada fila se convierte en una tarjeta y cada celda lleva su
-   etiqueta delante, tomada de `data-etiqueta`. */
+/* El código de pedido y el nombre son el enlace de la fila. */
+.enlace-fila {
+  font-weight: var(--peso-medio);
+}
+
+.enlace-fila:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* La hora manda: grande, condensada, y el retraso justo debajo. */
+.hora {
+  display: block;
+  font-size: 20px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.hora__retraso {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 100%;
+  color: var(--color-alerta);
+}
+
+.hora__dia {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  font-stretch: 100%;
+  color: var(--color-texto-suave);
+}
+
+.card--salidas .hora__dia {
+  color: var(--color-tinta);
+}
+
+.tenue {
+  color: var(--color-texto-suave);
+}
+
+.destino small {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+
+.destino small::before {
+  content: '·';
+  margin: 0 var(--esp-2);
+}
+
+.card--salidas .destino small {
+  color: var(--color-tinta);
+}
+
+.tabla__pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--esp-4);
+  flex-wrap: wrap;
+  padding-top: var(--esp-4);
+  font-weight: 500;
+}
+
+.tabla__pie a {
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* En móvil cada fila de usuarios se apila con su etiqueta delante. Las de
+   pedidos son un «billete»: la hora grande a la izquierda y el destino al
+   lado, con el estado debajo. */
 @media (max-width: 767px) {
   .tabla thead {
     display: none;
@@ -605,10 +956,8 @@
 
   .tabla tr {
     display: block;
-    border: 1px solid var(--color-borde);
-    border-radius: var(--radio-sm);
-    margin-bottom: var(--esp-3);
-    padding: var(--esp-2);
+    padding: var(--esp-2) 0;
+    border-bottom: 1px solid var(--color-borde);
   }
 
   .tabla td {
@@ -616,8 +965,9 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--esp-4);
-    border-top: none;
-    padding: var(--esp-2);
+    height: auto;
+    border-bottom: 0;
+    padding: var(--esp-1) 0;
     text-align: left;
   }
 
@@ -632,6 +982,50 @@
   .tabla__acciones {
     justify-content: flex-end;
   }
+
+  .card--salidas .tabla tr {
+    border-bottom-color: rgba(20, 19, 15, 0.18);
+  }
+
+  .tabla--pedidos tr {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'hora destino codigo'
+      'hora cliente cliente'
+      'hora repartidor repartidor'
+      'hora estado estado';
+    column-gap: var(--esp-3);
+    padding: var(--esp-3) 0;
+  }
+
+  .tabla--pedidos td {
+    display: block;
+    padding: 1px 0;
+  }
+
+  .tabla--pedidos td::before {
+    content: none;
+  }
+
+  .tabla--pedidos td[data-area='hora'] { grid-area: hora; }
+  .tabla--pedidos td[data-area='codigo'] { grid-area: codigo; text-align: right; }
+  .tabla--pedidos td[data-area='destino'] { grid-area: destino; font-weight: var(--peso-medio); }
+  .tabla--pedidos td[data-area='cliente'] { grid-area: cliente; color: var(--color-texto-suave); }
+  .tabla--pedidos td[data-area='repartidor'] { grid-area: repartidor; color: var(--color-texto-suave); }
+  .tabla--pedidos td[data-area='estado'] { grid-area: estado; padding-top: var(--esp-2); }
+  .tabla--pedidos td[data-area='creado'] { display: none; }
+
+  /* En el billete el distrito va debajo de la calle, sin punto separador. */
+  .tabla--pedidos .destino small {
+    display: block;
+    margin-top: 1px;
+    font-weight: var(--peso-normal);
+  }
+
+  .tabla--pedidos .destino small::before {
+    content: none;
+  }
 }
 
 /* ═══ Paginación ═══════════════════════════════════════════════════ */
@@ -639,73 +1033,59 @@
 .paginacion {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: var(--esp-4);
   margin-top: var(--esp-5);
 }
 
 .paginacion__posicion {
   font-size: var(--texto-sm);
+  font-weight: 500;
   color: var(--color-texto-suave);
 }
 
-/* ═══ Estados: carga, vacío, error ═════════════════════════════════ */
+/* ═══ Estados: carga, vacío, error ═════════════════════════════════
+   Todo con texto y una acción: sin ilustraciones ni emojis. La carga
+   reserva el sitio de las filas reales y no brilla: la página no salta
+   al llegar los datos. */
 
 .estado {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
   gap: var(--esp-3);
-  padding: var(--esp-10) var(--esp-4);
-}
-
-.estado__icono {
-  font-size: var(--texto-dato);
-  line-height: 1;
+  max-width: 560px;
+  padding: var(--esp-6) 0 var(--esp-8);
 }
 
 .estado__titulo {
-  font-size: var(--texto-md);
-  font-weight: var(--peso-medio);
+  font-size: 30px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1.05;
 }
 
 .estado__detalle {
-  font-size: var(--texto-sm);
+  font-size: var(--texto-md);
   color: var(--color-texto-suave);
-  max-width: 46ch;
 }
 
-/* Esqueleto de carga: ocupa el sitio del contenido real para que la página no
-   dé un salto al llegar los datos. */
+.card--salidas .estado__detalle {
+  color: #2b2a24;
+}
+
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--color-borde) 25%,
-    var(--color-superficie-alt) 37%,
-    var(--color-borde) 63%
-  );
-  background-size: 400% 100%;
-  animation: skeleton 1.4s ease infinite;
-  border-radius: var(--radio-sm);
-}
-
-@keyframes skeleton {
-  0% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0 50%;
-  }
+  height: 14px;
+  margin: 19px 0;
+  background: #e3e5e7;
 }
 
 .skeleton--texto {
   height: 14px;
-  margin: var(--esp-2) 0;
 }
 
 .skeleton--dato {
-  height: 34px;
+  height: 40px;
   width: 60%;
 }
 
@@ -722,23 +1102,29 @@
   display: grid;
   place-items: center;
   padding: var(--esp-4);
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(20, 19, 15, 0.6);
+  animation: velo 0.16s ease-out both;
 }
 
 .dialogo__caja {
   background: var(--color-superficie);
   border-radius: var(--radio-lg);
   box-shadow: var(--sombra-flotante);
-  padding: var(--esp-6);
+  padding: 28px;
   width: 100%;
-  max-width: 440px;
+  max-width: 480px;
   display: flex;
   flex-direction: column;
-  gap: var(--esp-4);
+  gap: var(--esp-3);
+  animation: dialogo 0.18s var(--ease-salida) both;
+}
+
+.dialogo__caja h2 {
+  font-size: 30px;
 }
 
 .dialogo__detalle {
-  font-size: var(--texto-sm);
+  font-size: var(--texto-md);
   color: var(--color-texto-suave);
   line-height: var(--alto-lectura);
 }
@@ -747,6 +1133,20 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--esp-3);
+  margin-top: var(--esp-3);
+}
+
+@keyframes velo {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialogo {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
 }
 
 @media (max-width: 767px) {
@@ -759,44 +1159,383 @@
   }
 }
 
-/* ═══ Dato destacado (KPI) ═════════════════════════════════════════ */
+/* ═══ Cifras ═══════════════════════════════════════════════════════ */
 
-.kpi__titulo {
-  font-size: var(--texto-sm);
+.datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--esp-5) var(--esp-6);
+}
+
+.dato__valor {
+  display: block;
+  font-size: var(--texto-dato);
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1;
+}
+
+.dato__etiqueta {
+  display: block;
+  margin-top: var(--esp-1);
   color: var(--color-texto-suave);
 }
 
-.kpi__valor {
-  font-size: var(--texto-dato);
-  font-weight: var(--peso-fuerte);
-  line-height: 1.1;
-  margin-top: var(--esp-1);
-}
-
-.rejilla-kpi {
+/* El día de un vistazo: una sola banda proporcional con sus cifras debajo. */
+.dia {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--esp-4);
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: var(--esp-10);
+  align-items: center;
+  padding-top: var(--esp-2);
 }
 
-/* ═══ Pila vertical ════════════════════════════════════════════════ */
+.dia__total {
+  display: block;
+  font-size: 84px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 0.9;
+}
+
+.dia__tira {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+  list-style: none;
+}
+
+.dia__tira > li {
+  height: 100%;
+  min-width: 2px;
+  transition: width 0.4s var(--ease-salida);
+}
+
+.seg--entregado { background: var(--color-exito); }
+.seg--camino { background: var(--color-amarillo); box-shadow: inset 0 0 0 2px var(--color-tinta); }
+.seg--salir { background: #b9bec3; }
+.seg--cancelado { background: var(--color-alerta); }
+
+.dia__leyenda {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--esp-4);
+  margin-top: 14px;
+  list-style: none;
+}
+
+.dia__leyenda b {
+  display: block;
+  font-size: 32px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1;
+}
+
+.dia__leyenda span {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-top: var(--esp-1);
+  color: var(--color-texto-suave);
+}
+
+.dia__leyenda i {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  box-shadow: inset 0 0 0 2px var(--color-tinta);
+}
+
+@media (max-width: 767px) {
+  .dia {
+    grid-template-columns: 1fr;
+    gap: var(--esp-4);
+  }
+
+  .dia__total {
+    font-size: 64px;
+  }
+
+  .dia__leyenda {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ═══ Composición ══════════════════════════════════════════════════ */
 
 .pila {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-5);
+  gap: var(--esp-6);
 }
 
-/* ═══ Rutas: leyenda del mapa y lista de paradas ═══════════════════ */
+.columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--ancho-lateral);
+  gap: var(--esp-6);
+  align-items: start;
+}
+
+.columnas__principal,
+.columnas__lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+  min-width: 0;
+}
+
+@media (max-width: 1099px) {
+  .columnas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* En detalle de pedido la acción va antes que el mapa. */
+  .columnas--accion-primero > .columnas__lateral {
+    order: -1;
+  }
+}
+
+/* El resumen de «Planificar ruta» se queda a la vista mientras se baja por
+   la lista de pedidos: la columna lateral ocupa toda la altura de la fila. */
+@media (min-width: 1100px) {
+  .columnas--pegajoso > .columnas__lateral {
+    align-self: stretch;
+  }
+}
+
+/* Lista de datos: etiqueta a la izquierda, valor a la derecha. */
+.lista-datos {
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-datos > div {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: var(--esp-3);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.lista-datos dt {
+  color: var(--color-texto-suave);
+}
+
+.lista-datos dd {
+  font-weight: 500;
+}
+
+.lista-datos dd small {
+  display: block;
+  font-weight: var(--peso-normal);
+  color: var(--color-texto-suave);
+}
+
+/* ═══ Línea de tiempo (historial de un pedido) ═════════════════════ */
+
+.tiempo {
+  list-style: none;
+}
+
+.tiempo__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 60px 28px minmax(0, 1fr);
+  gap: 0 var(--esp-3);
+  min-height: 66px;
+  padding: 10px 0;
+}
+
+.tiempo__item::before {
+  content: '';
+  position: absolute;
+  left: calc(60px + var(--esp-3) + 13px);
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-tinta);
+}
+
+.tiempo__item:first-child::before {
+  top: 26px;
+}
+
+.tiempo__item:last-child::before {
+  bottom: auto;
+  height: 26px;
+}
+
+.tiempo__item--futuro::before {
+  background: none;
+  width: 0;
+  border-left: 2px dashed var(--color-tinta);
+}
+
+.tiempo__hora {
+  font-size: 20px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1.1;
+}
+
+.tiempo__hora small {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  font-stretch: 100%;
+  color: var(--color-texto-suave);
+}
+
+.tiempo__punto {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 4px auto 0;
+  background: var(--color-tinta);
+}
+
+.tiempo__punto--ahora {
+  background: var(--color-amarillo);
+  box-shadow: inset 0 0 0 3px var(--color-tinta);
+  transform: scale(1.3);
+}
+
+.tiempo__punto--ok {
+  background: var(--color-exito);
+  transform: scale(1.3);
+}
+
+.tiempo__punto--futuro {
+  background: var(--color-superficie);
+  box-shadow: inset 0 0 0 2px var(--color-tinta);
+}
+
+.tiempo__cuerpo b {
+  font-weight: var(--peso-medio);
+}
+
+.tiempo__cuerpo p {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+/* ═══ Rutas ════════════════════════════════════════════════════════ */
+
+.dividido {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: var(--esp-6);
+  align-items: start;
+}
+
+@media (max-width: 1099px) {
+  .dividido {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.rutas-lista {
+  list-style: none;
+}
+
+.ruta-item {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: var(--esp-3);
+  align-items: center;
+  width: calc(100% + 2 * var(--esp-6));
+  min-height: 76px;
+  margin: 0 calc(-1 * var(--esp-6));
+  padding: 14px var(--esp-6);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--color-borde);
+  color: inherit;
+  font: inherit;
+  transition: background-color 0.12s ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ruta-item:hover {
+    background: var(--color-superficie-alt);
+  }
+}
+
+.ruta-item[aria-pressed='true'],
+.ruta-item[aria-pressed='true']:hover {
+  background: var(--color-amarillo);
+}
+
+/* En móvil el bloque tiene 16 px de margen interior, no 24. */
+@media (max-width: 767px) {
+  .ruta-item {
+    width: calc(100% + 2 * var(--esp-4));
+    margin: 0 calc(-1 * var(--esp-4));
+    padding: 14px var(--esp-4);
+  }
+}
+
+.ruta-item__num {
+  font-size: 28px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1;
+}
+
+.ruta-item__repartidor {
+  display: block;
+  font-weight: var(--peso-medio);
+}
+
+.ruta-item__meta {
+  display: block;
+  margin: 2px 0 6px;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+
+.ruta-item[aria-pressed='true'] .ruta-item__meta {
+  color: var(--color-tinta);
+}
+
+.ruta-cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+  grid-template-areas: 'paradas mapa';
+  gap: var(--esp-8);
+  align-items: start;
+}
+
+.ruta-cuerpo__mapa {
+  grid-area: mapa;
+}
+
+.ruta-cuerpo__paradas {
+  grid-area: paradas;
+}
+
+@media (max-width: 1099px) {
+  .ruta-cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'mapa'
+      'paradas';
+    gap: var(--esp-5);
+  }
+}
 
 .leyenda {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--esp-4);
+  gap: var(--esp-2) var(--esp-5);
   align-items: center;
   margin-top: var(--esp-3);
-  font-size: var(--texto-xs);
+  font-size: var(--texto-sm);
   color: var(--color-texto-suave);
 }
 
@@ -807,81 +1546,301 @@
 }
 
 .leyenda__punto {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radio-full);
+  width: 12px;
+  height: 12px;
   flex: 0 0 auto;
+  box-shadow: inset 0 0 0 2px var(--color-tinta);
 }
 
 .paradas {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-  margin-top: var(--esp-5);
 }
 
 .paradas__item {
-  display: flex;
-  align-items: center;
-  gap: var(--esp-3);
-  flex-wrap: wrap;
-  padding: var(--esp-2) var(--esp-3);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-sm);
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px 28px minmax(0, 1fr);
+  gap: 0 var(--esp-3);
+  min-height: 72px;
+  padding: 10px 0;
 }
 
-.paradas__orden {
+.paradas__item::before {
+  content: '';
+  position: absolute;
+  left: calc(64px + var(--esp-3) + 13px);
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-tinta);
+}
+
+.paradas__item:first-child::before {
+  top: 26px;
+}
+
+.paradas__item:last-child::before {
+  bottom: auto;
+  height: 26px;
+}
+
+.paradas__item--siguiente {
+  background: var(--color-amarillo);
+  margin: 0 calc(-1 * var(--esp-3));
+  padding: 10px var(--esp-3);
+}
+
+.paradas__item--siguiente::before {
+  left: calc(64px + 2 * var(--esp-3) + 13px);
+}
+
+.paradas__hora {
+  font-size: 20px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1.1;
+}
+
+.paradas__hora small {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  font-stretch: 100%;
+  color: var(--color-texto-suave);
+}
+
+.paradas__item--siguiente .paradas__hora small {
+  color: var(--color-tinta);
+}
+
+.paradas__punto {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 4px auto 0;
+  background: var(--color-superficie);
+  box-shadow: inset 0 0 0 2px var(--color-tinta);
+}
+
+.paradas__punto--entregado {
+  background: var(--color-exito);
+  box-shadow: none;
+}
+
+.paradas__punto--fallido {
+  background: var(--color-alerta);
+  box-shadow: none;
+}
+
+.paradas__punto--siguiente {
+  background: var(--color-amarillo);
+  box-shadow: inset 0 0 0 3px var(--color-tinta);
+  transform: scale(1.3);
+}
+
+.paradas__cuerpo {
+  min-width: 0;
+}
+
+.paradas__titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--esp-2);
+  flex-wrap: wrap;
+}
+
+.paradas__titulo b {
+  font-weight: var(--peso-medio);
+}
+
+.paradas__estado {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-texto-suave);
+}
+
+.paradas__item--siguiente .paradas__estado {
+  color: var(--color-tinta);
+}
+
+.paradas__estado--fallido {
+  color: var(--color-alerta);
+}
+
+.paradas__direccion {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.paradas__item--siguiente .paradas__direccion {
+  color: var(--color-tinta);
+}
+
+/* Orden de visita en la lista de pedidos de «Planificar ruta». */
+.orden {
   flex: 0 0 auto;
-  width: 24px;
-  height: 24px;
   display: grid;
   place-items: center;
-  border-radius: var(--radio-full);
-  background: var(--color-primario);
+  width: 30px;
+  height: 30px;
+  background: var(--color-tinta);
   color: var(--color-texto-inverso);
-  font-size: var(--texto-xs);
+  font-size: 17px;
   font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
 }
 
-/* ═══ Fila seleccionable (pedidos de una ruta) ═════════════════════ */
+/* ═══ Planificar ruta: pedidos seleccionables y resumen ════════════ */
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+}
 
 .opcion {
   display: flex;
   align-items: center;
   gap: var(--esp-3);
   flex-wrap: wrap;
-  padding: var(--esp-3);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-sm);
+  min-height: 56px;
+  padding: var(--esp-2) var(--esp-3);
+  border-top: 1px solid var(--color-borde);
   background: var(--color-superficie);
   cursor: pointer;
+  transition: background-color 0.12s ease-out;
 }
 
-.opcion--elegida {
-  border-color: var(--color-primario);
-  background: var(--color-primario-suave);
+.opcion input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--color-tinta);
 }
 
-.opcion--bloqueada {
-  opacity: 0.55;
+@media (hover: hover) and (pointer: fine) {
+  .opcion:hover {
+    background: var(--color-superficie-alt);
+  }
+}
+
+.opcion--elegida,
+.opcion--elegida:hover {
+  background: var(--color-amarillo);
+}
+
+.opcion--bloqueada,
+.opcion--bloqueada:hover {
+  background: var(--color-superficie);
+  opacity: 0.58;
   cursor: not-allowed;
 }
 
 .opcion__nota {
   margin-left: auto;
   font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
   color: var(--color-texto-suave);
 }
 
-/* ═══ Resumen de requisitos antes de enviar ════════════════════════ */
+.opcion--elegida .opcion__nota {
+  color: var(--color-tinta);
+}
+
+.opcion__direccion {
+  font-size: var(--texto-sm);
+}
+
+.opcion__aviso {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--color-alerta);
+}
+
+/* El recorrido en construcción: paradas numeradas unidas por una línea. */
+.recorrido {
+  list-style: none;
+}
+
+.recorrido__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: var(--esp-3);
+  padding-bottom: var(--esp-4);
+}
+
+.recorrido__item:last-child {
+  padding-bottom: 0;
+}
+
+.recorrido__item::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 30px;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-tinta);
+}
+
+.recorrido__item:last-child::before {
+  display: none;
+}
+
+.recorrido__num {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--color-tinta);
+  color: var(--color-texto-inverso);
+  font-size: 17px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+}
+
+.recorrido__num--entregado {
+  background: var(--color-exito);
+}
+
+.recorrido__num--fallido {
+  background: var(--color-alerta);
+}
+
+.recorrido__texto {
+  align-self: center;
+  font-weight: var(--peso-medio);
+  overflow-wrap: anywhere;
+}
+
+.recorrido__texto small {
+  display: block;
+  font-weight: var(--peso-normal);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+
+.card--salidas .recorrido__texto small {
+  color: var(--color-tinta);
+}
 
 .resumen-envio {
+  position: sticky;
+  top: calc(var(--alto-barra) + var(--esp-4));
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--esp-5);
-  align-items: center;
-  justify-content: space-between;
+}
+
+@media (max-width: 1099px) {
+  .resumen-envio {
+    position: static;
+  }
 }
 
 .requisitos {
@@ -889,92 +1848,171 @@
   display: flex;
   flex-direction: column;
   gap: var(--esp-2);
-  flex: 1;
-  min-width: 240px;
-  font-size: var(--texto-sm);
-  color: var(--color-texto-suave);
+  padding-top: var(--esp-4);
+  border-top: 2px solid var(--color-tinta);
+  font-weight: 500;
 }
 
 .requisitos li {
   display: flex;
-  gap: var(--esp-2);
+  align-items: flex-start;
+  gap: 10px;
 }
 
-.requisitos__ok {
-  color: var(--color-texto);
+.requisitos svg {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
 }
 
-.requisitos__ok span {
-  color: var(--color-exito);
+/* La barra de «Nuevo pedido»: qué falta y las dos acciones. */
+.cierre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-6);
+  flex-wrap: wrap;
 }
 
-/* ═══ Explicador de pasos ══════════════════════════════════════════ */
+.cierre .requisitos {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-6);
+  padding: 0;
+  border: 0;
+}
 
+/* Un punto del pedido (origen o destino) con su letra. */
+.punto {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: var(--esp-3);
+  align-items: start;
+}
+
+.punto__letra {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-top: 22px;
+  background: var(--color-tinta);
+  color: var(--color-texto-inverso);
+  font-size: 16px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+}
+
+.punto__letra--destino {
+  background: var(--color-superficie);
+  color: var(--color-tinta);
+  box-shadow: inset 0 0 0 3px var(--color-tinta);
+}
+
+/* Pasos de «Qué es una ruta»: números grandes sobre una regla. */
 .pasos {
   list-style: none;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--esp-4);
+  gap: var(--esp-6);
 }
 
 .pasos__item {
-  display: flex;
-  gap: var(--esp-3);
-  align-items: flex-start;
+  border-top: 2px solid var(--color-tinta);
+  padding-top: var(--esp-3);
 }
 
-.pasos__icono {
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radio-sm);
-  background: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  font-size: var(--texto-md);
+.pasos__numero {
+  display: block;
+  margin-bottom: var(--esp-2);
+  font-size: 56px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1;
 }
 
 .pasos__titulo {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-fuerte);
 }
 
 .pasos__detalle {
-  font-size: var(--texto-sm);
   color: var(--color-texto-suave);
   line-height: var(--alto-normal);
 }
 
-/* Campo de código de un solo uso: dígitos separados y grandes. */
-.codigo {
-  font-size: var(--texto-xl);
-  letter-spacing: 8px;
-  text-align: center;
-  font-weight: var(--peso-fuerte);
-  color: var(--color-marca-oscuro);
+/* ═══ Marcadores del mapa ══════════════════════════════════════════
+   Los pone Leaflet dentro de `divIcon`: las clases vienen de marcadores.ts. */
+
+.marcador {
+  display: grid;
+  place-items: center;
+  font-family: var(--fuente);
+  font-weight: 800;
+  font-stretch: 75%;
+  line-height: 1;
 }
 
-/* ═══ Mapa (Leaflet) ═══════════════════════════════════════════════
-   El control de zoom y la atribución vienen con el aspecto por defecto de
-   Leaflet: cuadrados de esquina viva y sombra dura. Se retocan para que
-   sigan la misma paleta y radios que el resto de la interfaz. */
+.marcador--parada {
+  border-radius: 50%;
+  font-size: 15px;
+  background: var(--color-amarillo);
+  color: var(--color-tinta);
+  box-shadow: 0 0 0 3px var(--color-tinta);
+}
+
+.marcador--entregado {
+  background: var(--color-exito);
+  color: #fff;
+}
+
+.marcador--fallido {
+  background: var(--color-alerta);
+  color: #fff;
+}
+
+.marcador--punto {
+  font-size: 15px;
+  background: var(--color-tinta);
+  color: #fff;
+}
+
+.marcador--punto-destino {
+  background: #fff;
+  color: var(--color-tinta);
+  box-shadow: inset 0 0 0 3px var(--color-tinta);
+}
+
+.marcador--repartidor {
+  background: var(--color-amarillo);
+  box-shadow: 0 0 0 3px var(--color-tinta);
+  transform: rotate(45deg);
+}
+
+/* El control de zoom y la atribución vienen con el aspecto por defecto de
+   Leaflet; se retocan para que sigan la misma geometría recta. */
+
+.leaflet-container {
+  font-family: var(--fuente);
+}
 
 .leaflet-bar {
   border: none !important;
-  border-radius: var(--radio-sm) !important;
-  box-shadow: var(--sombra) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
   overflow: hidden;
 }
 
 .leaflet-bar a,
 .leaflet-bar a:hover {
-  width: 30px !important;
-  height: 30px !important;
-  line-height: 30px !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
   background: var(--color-superficie) !important;
-  color: var(--color-texto) !important;
+  color: var(--color-tinta) !important;
   border-bottom: 1px solid var(--color-borde) !important;
+  font-weight: 700;
 }
 
 .leaflet-bar a:hover {
@@ -987,536 +2025,319 @@
 
 .leaflet-control-attribution {
   background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(2px);
-  color: var(--color-texto-suave) !important;
+  color: var(--color-texto-tenue) !important;
   font-size: 10px !important;
-  border-radius: var(--radio-sm) 0 0 0 !important;
   padding: 1px var(--esp-2) !important;
 }
 
 .leaflet-control-attribution a {
-  color: var(--color-texto-suave) !important;
+  color: var(--color-texto-tenue) !important;
 }
 
 .leaflet-popup-content-wrapper {
-  border-radius: var(--radio-sm) !important;
+  border-radius: 0 !important;
   box-shadow: var(--sombra-flotante) !important;
 }
 
 .leaflet-popup-content {
-  font-family: inherit !important;
-  font-size: var(--texto-sm) !important;
+  font-family: var(--fuente) !important;
+  font-size: var(--texto-base) !important;
   margin: var(--esp-2) var(--esp-3) !important;
 }
 
-/* ═══ Ranking de eficiencia ═══════════════════════════════════════
-   Una fila por repartidor, ordenadas de mejor a peor. El color del relleno
-   lleva la severidad (verde/ámbar/rojo), no solo la identidad de una serie:
-   por eso no hace falta leyenda, el propio color ya dice si va bien. */
+.mapa {
+  border: 0;
+  background: #e4e7e9;
+}
+
+/* ═══ Eficiencia de repartidores ═══════════════════════════════════
+   De mejor a peor. La marca vertical es la meta del 90 %. El color del
+   relleno lleva la severidad, pero el número y la posición ya la dicen. */
 
 .ranking {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-4);
 }
 
 .ranking__fila {
-  display: flex;
-  gap: var(--esp-3);
-  align-items: flex-start;
-}
-
-.ranking__avatar {
-  flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radio-full);
-  background: var(--color-primario-suave);
-  color: var(--color-primario);
   display: grid;
-  place-items: center;
-  font-size: var(--texto-xs);
+  gap: 2px var(--esp-4);
+  align-items: center;
+  padding: var(--esp-4) 0;
+  border-bottom: 1px solid var(--color-borde);
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'pos nombre pct'
+    'pos pista pista'
+    'pos meta meta';
+}
+
+.ranking__pos {
+  grid-area: pos;
+  align-self: start;
+  font-size: 28px;
   font-weight: var(--peso-fuerte);
-}
-
-.ranking__cuerpo {
-  flex: 1;
-  min-width: 0;
-}
-
-.ranking__cabecera {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-1);
+  font-stretch: 75%;
+  line-height: 1;
+  color: var(--color-texto-tenue);
 }
 
 .ranking__nombre {
-  font-size: var(--texto-sm);
+  grid-area: nombre;
+  font-size: var(--texto-md);
   font-weight: var(--peso-medio);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.ranking__porcentaje {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--esp-2);
-  font-size: var(--texto-md);
+.ranking__pct {
+  grid-area: pct;
+  font-size: 30px;
   font-weight: var(--peso-fuerte);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-texto);
-}
-
-.ranking__punto-severidad {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radio-full);
-  flex: 0 0 auto;
+  font-stretch: 75%;
+  line-height: 1;
+  text-align: right;
 }
 
 .ranking__pista {
-  height: 8px;
-  border-radius: var(--radio-full);
-  background: var(--color-superficie-alt);
-  overflow: hidden;
+  grid-area: pista;
+  position: relative;
+  height: 12px;
+  margin: var(--esp-2) 0 var(--esp-1);
+  background: var(--color-borde);
 }
 
 .ranking__relleno {
   height: 100%;
-  border-radius: var(--radio-full);
-  transition: width 0.4s ease;
+  transition: width 0.4s var(--ease-salida);
+}
+
+.ranking__meta90 {
+  position: absolute;
+  left: 90%;
+  top: -5px;
+  bottom: -5px;
+  width: 2px;
+  background: var(--color-tinta);
 }
 
 .ranking__meta {
+  grid-area: meta;
   display: flex;
   flex-wrap: wrap;
+  gap: 0 var(--esp-4);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+
+/* En la página de reportes hay sitio: una sola fila por repartidor. */
+@media (min-width: 768px) {
+  .ranking--pagina .ranking__fila {
+    grid-template-columns: 48px minmax(180px, 1fr) minmax(0, 1.5fr) 96px;
+    grid-template-areas:
+      'pos nombre pista pct'
+      'pos meta   pista pct';
+    min-height: 76px;
+  }
+
+  .ranking--pagina .ranking__pista {
+    margin: 0;
+  }
+}
+
+.ranking__clave {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-5);
+  margin-top: var(--esp-4);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+
+/* ═══ Cuenta de demostración (acceso) ══════════════════════════════ */
+
+.demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin-top: var(--esp-6);
+  padding: var(--esp-4);
+  background: var(--color-superficie-alt);
+}
+
+.demo__titulo {
+  font-weight: var(--peso-fuerte);
+}
+
+.demo__datos {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+/* Etiqueta encima del valor: aguanta cualquier ancho sin partir el correo. */
+.demo__dato {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'etiqueta copiar'
+    'valor    copiar';
+  column-gap: var(--esp-2);
   align-items: center;
-  gap: var(--esp-1) var(--esp-3);
-  margin-top: var(--esp-2);
+  padding: var(--esp-2) 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.demo__etiqueta {
+  grid-area: etiqueta;
   font-size: var(--texto-xs);
   color: var(--color-texto-suave);
 }
 
-.ranking__punto {
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radio-full);
-  margin-right: calc(var(--esp-1) * -1);
+.demo__valor {
+  grid-area: valor;
+  font-weight: var(--peso-medio);
+  overflow-wrap: anywhere;
+  user-select: all;
 }
 
-.ranking__punto--exito {
-  background: var(--color-exito);
+.demo__copiar {
+  grid-area: copiar;
 }
 
-.ranking__punto--alerta {
-  background: var(--color-alerta);
-  margin-left: var(--esp-1);
+.demo__copiar {
+  min-height: 32px;
+  padding: 0 var(--esp-2);
+  background: none;
+  border: 0;
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-/* ═══ Acceso: escena a la izquierda, formulario a la derecha ═══════
-   Reparto 55/45 en pantallas amplias, como un panel de seguimiento real:
-   el mapa manda en superficie, el formulario tiene su propio aire. */
+.demo__copiar:hover {
+  background: rgba(20, 19, 15, 0.07);
+}
+
+/* ═══ Acceso: panel amarillo con el reloj + formulario ═════════════ */
 
 .acceso {
-  position: relative;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(380px, 5fr);
   min-height: 100vh;
+  background: var(--color-superficie);
+}
+
+.acceso__reloj {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--esp-8);
+  padding: 40px 56px;
+  background: var(--color-amarillo);
+  color: var(--color-tinta);
+}
+
+.acceso__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font-size: 26px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 80%;
+}
+
+.acceso__logo {
   display: grid;
   place-items: center;
-  padding: var(--esp-6);
-  background:
-    radial-gradient(900px 700px at 26% 44%, rgba(37, 99, 235, 0.18) 0%, rgba(11, 18, 32, 0) 70%),
-    linear-gradient(160deg, #101a2e 0%, #0b1220 55%, #080d18 100%);
+  width: 36px;
+  height: 36px;
+  background: var(--color-tinta);
+  color: var(--color-amarillo);
+  font-size: 22px;
+  font-weight: 800;
 }
 
-/* Grano: sin él, un degradado tan liso se ve «generado». */
-.acceso::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.04;
-  mix-blend-mode: overlay;
-  pointer-events: none;
+.acceso__lema {
+  max-width: 520px;
+  margin-bottom: var(--esp-2);
+  font-size: 40px;
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1.05;
+  text-wrap: balance;
 }
 
-.acceso__escena {
-  display: none;
+.acceso__hora {
+  display: block;
+  font-size: clamp(120px, 17vw, 250px);
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+}
+
+.acceso__fecha {
+  margin-top: 14px;
+  font-size: 20px;
+  font-weight: 500;
 }
 
 .acceso__panel {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 100%;
-}
-
-@media (min-width: 1024px) {
-  .acceso {
-    grid-template-columns: 55% 45%;
-    place-items: stretch;
-    padding: 0;
-  }
-
-  .acceso__escena {
-    position: relative;
-    display: block;
-    overflow: hidden;
-  }
-
-  .acceso__panel {
-    padding: var(--esp-8);
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 48px;
 }
 
 .acceso__caja {
-  position: relative;
-  z-index: 1;
-  background: color-mix(in srgb, var(--color-superficie) 92%, transparent);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: var(--radio-lg);
-  box-shadow:
-    0 30px 60px -20px rgba(2, 6, 23, 0.7),
-    0 0 90px -25px rgba(37, 99, 235, 0.4);
-  padding: var(--esp-8);
   width: 100%;
   max-width: 400px;
+}
+
+.acceso__formulario {
   display: flex;
   flex-direction: column;
   gap: var(--esp-4);
 }
 
-.acceso__caja .btn--primario {
-  transition: background 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
-}
-
-.acceso__caja .btn--primario:hover:not(:disabled) {
-  box-shadow: 0 10px 26px -8px rgba(37, 99, 235, 0.6);
-  transform: translateY(-1px);
-}
-
-.acceso__caja .control:focus-visible {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primario) 18%, transparent);
-}
-
-.acceso__encabezado {
-  display: flex;
-  align-items: center;
-  gap: var(--esp-3);
-}
-
-.acceso__logo {
-  flex: 0 0 auto;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radio-sm);
-  background: linear-gradient(135deg, var(--color-primario) 0%, var(--color-marca-medio) 100%);
-  color: var(--color-texto-inverso);
-  box-shadow: 0 8px 18px -6px rgba(37, 99, 235, 0.6);
-}
-
-.acceso__marca {
-  font-size: var(--texto-dato);
-  line-height: 1.1;
-  color: var(--color-marca-oscuro);
+.acceso__titulo {
+  font-size: var(--texto-titulo);
 }
 
 .acceso__enlace {
-  text-align: center;
-  color: var(--color-primario);
-  font-size: var(--texto-sm);
+  align-self: flex-start;
+  margin-top: var(--esp-2);
   font-weight: var(--peso-medio);
-}
-
-.acceso__enlace:hover {
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-@media (max-width: 767px) {
-  .acceso__caja {
+.acceso__caja .btn {
+  min-height: 46px;
+}
+
+@media (max-width: 860px) {
+  .acceso {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acceso__reloj {
+    min-height: 300px;
     padding: var(--esp-6);
   }
-}
 
-/* ═══ La ciudad que se reparte ═════════════════════════════════════
-   Ilustración isométrica en SVG generado (ver CiudadReparto.tsx). Aquí solo
-   viven los estilos de la ruta, el marcador y la capa de rótulos: la
-   geometría de la ciudad la calcula el componente. */
-
-.ciudad {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.ciudad__lienzo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* ── La ruta ─────────────────────────────────────────────────────────
-   Cuatro pasadas sobre el mismo trazado: asfalto, línea discontinua del
-   carril, la ruta viva en verde y las marcas de avance que corren encima. */
-.ciudad__asfalto {
-  fill: none;
-  stroke: #4b587a;
-  stroke-width: 26;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.ciudad__linea {
-  fill: none;
-  stroke: rgba(196, 214, 245, 0.45);
-  stroke-width: 1.6;
-  stroke-dasharray: 7 11;
-  stroke-linecap: round;
-}
-
-.ciudad__trazado {
-  fill: none;
-  stroke: #22c55e;
-  stroke-width: 8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1400;
-  stroke-dashoffset: 1400;
-  animation: ciudad-trazar 2.6s ease-out 0.3s forwards;
-}
-
-.ciudad__flujo {
-  fill: none;
-  stroke: rgba(226, 255, 236, 0.95);
-  stroke-width: 3.5;
-  stroke-linecap: round;
-  stroke-dasharray: 3 24;
-  animation: ciudad-fluir 1.4s linear infinite;
-}
-
-/* ── El repartidor ───────────────────────────────────────────────────
-   Vive dentro del SVG, así que `offset-path` recibe las mismas unidades
-   del viewBox que dibujan la ruta y el marcador nunca se despega. */
-.ciudad__repartidor {
-  offset-rotate: 0deg;
-  animation: ciudad-repartir 15s ease-in-out 1.8s infinite;
-}
-
-.ciudad__punto {
-  fill: var(--color-primario);
-  stroke: #fff;
-  stroke-width: 3;
-  filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.95));
-}
-
-.ciudad__pulso {
-  fill: none;
-  stroke: var(--color-primario);
-  stroke-width: 2;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: ciudad-latir 2.2s ease-out infinite;
-}
-
-/* ── Etiquetas de los tres actores ───────────────────────────────────
-   Texto real por encima del dibujo, no píxeles: se lee con lector de
-   pantalla, se traduce y escala con la tipografía del sistema. */
-.hitos {
-  list-style: none;
-  position: absolute;
-  inset: 0;
-}
-
-.hitos__item {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: var(--esp-3);
-  padding: var(--esp-2) var(--esp-3);
-  border-radius: 12px;
-  background: rgba(13, 21, 38, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(120, 160, 225, 0.28);
-  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.85);
-  color: #e7eefc;
-  white-space: nowrap;
-  opacity: 0;
-  animation: hito-entrar 0.6s ease-out forwards;
-}
-
-.hitos__item--almacen {
-  top: 24%;
-  left: 25%;
-  animation-delay: 0.6s;
-}
-
-.hitos__item--repartidor {
-  top: 45%;
-  left: 33%;
-  animation-delay: 1.2s;
-}
-
-.hitos__item--cliente {
-  top: 73%;
-  left: 44%;
-  animation-delay: 1.8s;
-}
-
-.hitos__item strong {
-  display: block;
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-}
-
-.hitos__item small {
-  display: block;
-  font-size: 11px;
-  color: rgba(190, 208, 240, 0.78);
-}
-
-.hitos__icono {
-  flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  font-size: 15px;
-}
-
-.hitos__icono--ok {
-  background: rgba(34, 197, 94, 0.18);
-  color: #4ade80;
-}
-
-.hitos__icono--activo {
-  background: rgba(37, 99, 235, 0.22);
-  color: #7aa8ff;
-}
-
-.hitos__check {
-  color: #4ade80;
-  font-size: var(--texto-sm);
-}
-
-/* ── Recorrido resumido ────────────────────────────────────────────── */
-.progreso {
-  position: absolute;
-  left: 7%;
-  bottom: 7%;
-  padding: var(--esp-4) var(--esp-5);
-  border-radius: 14px;
-  background: rgba(13, 21, 38, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(120, 160, 225, 0.22);
-  opacity: 0;
-  animation: hito-entrar 0.6s ease-out 2.3s forwards;
-}
-
-.progreso__titulo {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(190, 208, 240, 0.65);
-  margin-bottom: var(--esp-3);
-}
-
-.progreso__pasos {
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: var(--esp-5);
-  font-size: var(--texto-xs);
-  color: #dbe6fa;
-}
-
-.progreso__pasos li {
-  display: flex;
-  align-items: center;
-  gap: var(--esp-2);
-  position: relative;
-}
-
-.progreso__pasos li + li::before {
-  content: '';
-  position: absolute;
-  left: calc(var(--esp-5) * -1);
-  width: var(--esp-5);
-  height: 2px;
-  background: rgba(34, 197, 94, 0.45);
-}
-
-.progreso__punto {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 9px rgba(34, 197, 94, 0.8);
-}
-
-@keyframes ciudad-trazar {
-  to {
-    stroke-dashoffset: 0;
+  .acceso__hora {
+    font-size: 96px;
   }
-}
 
-@keyframes ciudad-fluir {
-  to {
-    stroke-dashoffset: -27;
+  .acceso__lema {
+    font-size: 28px;
   }
-}
 
-@keyframes ciudad-repartir {
-  0% {
-    offset-distance: 0%;
-  }
-  /* Pausas en cada parada: entregar lleva tiempo, y el alto es lo que
-     convierte un punto que se desliza en un repartidor que trabaja. */
-  30%,
-  37% {
-    offset-distance: 40%;
-  }
-  60%,
-  67% {
-    offset-distance: 70%;
-  }
-  90%,
-  100% {
-    offset-distance: 100%;
-  }
-}
-
-@keyframes ciudad-latir {
-  from {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  to {
-    transform: scale(3);
-    opacity: 0;
-  }
-}
-
-@keyframes hito-entrar {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .acceso__panel {
+    padding: var(--esp-8) var(--esp-6);
   }
 }

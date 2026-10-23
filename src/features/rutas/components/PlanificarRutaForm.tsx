@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { rutasApi } from '../services/rutasApi';
 import { pedidosApi } from '../../pedidos/services/pedidosApi';
 import { usuariosApi } from '../../usuarios/services/usuariosApi';
 import type { Usuario, Pedido } from '../../../types';
 import { Card, Campo, Input, Select, Boton, Aviso, BadgeEstado, PageHeader } from '../../../components/ui';
 import { EstadoCarga, EstadoVacio } from '../../../components/Estados';
+import { IconoCheck, IconoPendiente } from '../../../components/Iconos';
 import { mensajeDeError } from '../../../utils/errores';
 import ComoFunciona from './ComoFunciona';
 import TiraRecorrido from './TiraRecorrido';
@@ -149,122 +150,135 @@ export default function PlanificarRutaForm() {
 
   return (
     <form onSubmit={enviar} className="pila">
-      <PageHeader
-        titulo="Planificar ruta"
-        subtitulo="Junta varios pedidos en un solo recorrido y asígnaselo a un repartidor."
-      />
+      <div>
+        <Link to="/rutas" className="volver">
+          ← Volver a rutas
+        </Link>
+        <PageHeader
+          titulo="Planificar ruta"
+          subtitulo="Junta varios pedidos en un solo recorrido y asígnaselo a un repartidor."
+        />
+      </div>
 
       <ComoFunciona />
 
       {error && <Aviso tono="error">{error}</Aviso>}
 
-      <Card>
-        <h2 style={{ marginBottom: 'var(--esp-4)' }}>Quién reparte y qué día</h2>
-        <div className="rejilla">
-          <Campo etiqueta="Repartidor">
-            <Select value={repartidorId} onChange={(e) => setRepartidorId(e.target.value)} required>
-              <option value="">Selecciona un repartidor…</option>
-              {repartidores.map((r) => (
-                <option key={r.id} value={r.id}>{r.nombre_completo}</option>
-              ))}
-            </Select>
-          </Campo>
-          <Campo etiqueta="Día del reparto">
-            <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
-          </Campo>
-        </div>
-      </Card>
+      <div className="columnas columnas--pegajoso">
+        <div className="columnas__principal">
+          <Card>
+            <h2 style={{ marginBottom: 'var(--esp-4)' }}>Quién reparte y qué día</h2>
+            <div className="rejilla">
+              <Campo etiqueta="Repartidor">
+                <Select value={repartidorId} onChange={(e) => setRepartidorId(e.target.value)} required>
+                  <option value="">Selecciona un repartidor…</option>
+                  {repartidores.map((r) => (
+                    <option key={r.id} value={r.id}>{r.nombre_completo}</option>
+                  ))}
+                </Select>
+              </Campo>
+              <Campo etiqueta="Día del reparto">
+                <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
+              </Campo>
+            </div>
+          </Card>
 
-      <Card>
-        <h2 style={{ marginBottom: 'var(--esp-1)' }}>Qué pedidos lleva, y en qué orden</h2>
-        <p style={{ fontSize: 'var(--texto-sm)', color: 'var(--color-texto-suave)', marginBottom: 'var(--esp-4)' }}>
-          Márcalos en el orden en que quieres que los visite. El número que aparece al lado es su
-          turno en el recorrido.
-        </p>
-
-        {recorrido.length > 0 && (
-          <Card plano style={{ marginBottom: 'var(--esp-4)' }}>
-            <p style={{ fontSize: 'var(--texto-xs)', fontWeight: 'var(--peso-medio)', marginBottom: 'var(--esp-3)' }}>
-              Así queda el recorrido
+          <Card>
+            <div className="card__cabecera">
+              <h2>Qué pedidos lleva, y en qué orden</h2>
+              {!cargando && pedidos.length > 0 && (
+                <span className="card__nota">{pedidos.length} disponibles</span>
+              )}
+            </div>
+            <p className="card__nota" style={{ marginBottom: 'var(--esp-4)' }}>
+              Márcalos en el orden en que quieres que los visite. El número que aparece al lado es
+              su turno en el recorrido.
             </p>
-            <TiraRecorrido puntos={recorrido} />
+
+            {cargando ? (
+              <EstadoCarga filas={5} etiqueta="Cargando los pedidos…" />
+            ) : pedidos.length === 0 ? (
+              <EstadoVacio
+                titulo="No hay pedidos pendientes de repartir"
+                detalle="Crea uno desde «Nuevo pedido» y vuelve aquí para agruparlo en una ruta."
+              />
+            ) : (
+              <div className="opciones">
+                {pedidos.map((p) => {
+                  const orden = seleccion.indexOf(p.id);
+                  const elegido = orden >= 0;
+                  const enRuta = rutaPorPedido[p.id];
+                  const direccion = p.direccion_destino.calle ?? '';
+                  const sinDireccion = SOLO_COORDENADAS.test(direccion.trim());
+                  return (
+                    <label
+                      key={p.id}
+                      className={`opcion${elegido ? ' opcion--elegida' : ''}${enRuta ? ' opcion--bloqueada' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={elegido}
+                        disabled={Boolean(enRuta)}
+                        onChange={() => alternar(p.id)}
+                      />
+                      {elegido && <span className="orden">{orden + 1}</span>}
+                      <strong>{p.codigo_seguimiento}</strong>
+                      <BadgeEstado codigo={p.estado.codigo} nombre={p.estado.nombre} />
+                      <span className="opcion__direccion">{direccionDe(p)}</span>
+                      {sinDireccion && (
+                        <span className="opcion__aviso">
+                          Sin dirección escrita: el repartidor solo vería coordenadas
+                        </span>
+                      )}
+                      {enRuta && <span className="opcion__nota">Ya va en la ruta #{enRuta}</span>}
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        </div>
+
+        <div className="columnas__lateral">
+          <Card className="card--salidas resumen-envio">
+            <h2>Así queda el recorrido</h2>
+
+            {recorrido.length > 0 ? (
+              <TiraRecorrido puntos={recorrido} />
+            ) : (
+              <p className="card__nota">
+                Marca los pedidos y verás aquí las paradas, en el orden en que se visitarán.
+              </p>
+            )}
+
             {mismoSitio && (
-              <p style={{ fontSize: 'var(--texto-sm)', color: 'var(--color-aviso)', marginTop: 'var(--esp-3)' }}>
+              <Aviso tono="atencion">
                 Los {seleccion.length} pedidos marcados están registrados en la misma dirección, así
                 que son una sola parada: no hay ningún camino que recorrer entre ellos. Marca algún
                 pedido que vaya a otro sitio, o corrige antes su dirección de entrega.
-              </p>
+              </Aviso>
             )}
+
+            <ul className="requisitos" aria-label="Qué falta para trazar la ruta">
+              {requisitos.map((r) => (
+                <li key={r.texto}>
+                  {r.ok ? <IconoCheck aria-hidden /> : <IconoPendiente aria-hidden />}
+                  {r.ok ? r.texto : <b>{r.texto}</b>}
+                </li>
+              ))}
+            </ul>
+
+            <div className="barra-acciones">
+              <Boton type="button" variante="neutro" onClick={() => navigate('/rutas')}>
+                Cancelar
+              </Boton>
+              <Boton type="submit" disabled={!listo || guardando} style={{ flex: 1 }}>
+                {guardando ? 'Trazando el recorrido…' : 'Trazar y guardar la ruta'}
+              </Boton>
+            </div>
           </Card>
-        )}
-
-        {cargando ? (
-          <EstadoCarga filas={5} etiqueta="Cargando los pedidos…" />
-        ) : pedidos.length === 0 ? (
-          <EstadoVacio
-            icono="📦"
-            titulo="No hay pedidos pendientes de repartir"
-            detalle="Crea uno desde «Nuevo pedido» y vuelve aquí para agruparlo en una ruta."
-          />
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--esp-2)' }}>
-            {pedidos.map((p) => {
-              const orden = seleccion.indexOf(p.id);
-              const elegido = orden >= 0;
-              const enRuta = rutaPorPedido[p.id];
-              const direccion = p.direccion_destino.calle ?? '';
-              const sinDireccion = SOLO_COORDENADAS.test(direccion.trim());
-              return (
-                <label
-                  key={p.id}
-                  className={`opcion${elegido ? ' opcion--elegida' : ''}${enRuta ? ' opcion--bloqueada' : ''}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={elegido}
-                    disabled={Boolean(enRuta)}
-                    onChange={() => alternar(p.id)}
-                  />
-                  {elegido && <span className="paradas__orden">{orden + 1}</span>}
-                  <strong>{p.codigo_seguimiento}</strong>
-                  <BadgeEstado codigo={p.estado.codigo} nombre={p.estado.nombre} />
-                  <span style={{ fontSize: 'var(--texto-sm)', color: 'var(--color-texto-suave)' }}>
-                    {direccionDe(p)}
-                  </span>
-                  {sinDireccion && (
-                    <span style={{ fontSize: 'var(--texto-xs)', color: 'var(--color-aviso)' }}>
-                      ⚠ sin dirección escrita: el repartidor solo vería coordenadas
-                    </span>
-                  )}
-                  {enRuta && (
-                    <span className="opcion__nota">Ya va en la ruta #{enRuta}</span>
-                  )}
-                </label>
-              );
-            })}
-          </div>
-        )}
-      </Card>
-
-      <Card className="resumen-envio">
-        <ul className="requisitos">
-          {requisitos.map((r) => (
-            <li key={r.texto} className={r.ok ? 'requisitos__ok' : undefined}>
-              <span aria-hidden>{r.ok ? '✓' : '○'}</span>
-              {r.texto}
-            </li>
-          ))}
-        </ul>
-
-        <div className="barra-acciones">
-          <Boton type="button" variante="neutro" onClick={() => navigate('/rutas')}>
-            Cancelar
-          </Boton>
-          <Boton type="submit" disabled={!listo || guardando}>
-            {guardando ? 'Trazando el recorrido…' : 'Trazar y guardar la ruta'}
-          </Boton>
         </div>
-      </Card>
+      </div>
     </form>
   );
 }

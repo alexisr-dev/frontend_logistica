@@ -10,22 +10,21 @@ interface FilaRanking extends RendimientoRepartidor {
   porcentaje: number | null;
 }
 
+/** Meta de entregas a tiempo: la marca vertical de cada pista. */
+const META = 90;
+const UMBRAL_AYUDA = 70;
+
 /**
  * La pregunta real detrás de «eficiencia» no es «cuántas entregas a tiempo y
  * cuántas tardías tuvo cada quien» —eso son solo los insumos—, es «quién va
  * bien y quién necesita ayuda». Un medidor ordenado de mejor a peor responde
- * eso de un vistazo; un par de barras agrupadas por persona obliga a restar
- * mentalmente. El color del relleno lleva la severidad, no solo la serie.
+ * eso de un vistazo. El color lleva la severidad (verde cumple la meta, rojo
+ * necesita ayuda), pero la posición y el número ya lo dicen sin color.
  */
 function colorSeveridad(porcentaje: number): string {
-  if (porcentaje >= 90) return 'var(--color-exito)';
-  if (porcentaje >= 70) return 'var(--color-aviso)';
+  if (porcentaje >= META) return 'var(--color-exito)';
+  if (porcentaje >= UMBRAL_AYUDA) return 'var(--color-tinta)';
   return 'var(--color-alerta)';
-}
-
-function iniciales(nombre: string): string {
-  const partes = nombre.trim().split(/\s+/);
-  return ((partes[0]?.[0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase();
 }
 
 function minutosLegibles(min: number): string {
@@ -36,52 +35,38 @@ function minutosLegibles(min: number): string {
 }
 
 function FilaEficiencia({ fila, posicion }: { fila: FilaRanking; posicion: number }) {
-  const color = fila.porcentaje !== null ? colorSeveridad(fila.porcentaje) : 'var(--color-borde)';
+  const porcentaje = fila.porcentaje;
+  const color = porcentaje !== null ? colorSeveridad(porcentaje) : 'var(--color-borde)';
 
   return (
     <li className="ranking__fila">
-      <span className="ranking__avatar" aria-hidden>
-        {iniciales(fila.repartidor)}
+      <span className="ranking__pos" aria-hidden>
+        {posicion}
       </span>
 
-      <div className="ranking__cuerpo">
-        <div className="ranking__cabecera">
-          <span className="ranking__nombre">
-            {/* El primer puesto solo lleva trofeo si de verdad va bien: ser
-                el «menos malo» del grupo no es algo que celebrar. */}
-            {posicion === 1 && fila.porcentaje !== null && fila.porcentaje >= 90 && (
-              <span aria-hidden title="Mejor racha de entregas a tiempo">🏆 </span>
-            )}
-            {fila.repartidor}
-          </span>
-          <span className="ranking__porcentaje">
-            {/* El color va en el punto, nunca en el texto: así el número se
-                lee igual de bien para quien no distingue verde de rojo. */}
-            <span className="ranking__punto-severidad" style={{ background: color }} aria-hidden />
-            {fila.porcentaje !== null ? `${fila.porcentaje}%` : '—'}
-          </span>
-        </div>
+      <span className="ranking__nombre">{fila.repartidor}</span>
 
-        <div
-          className="ranking__pista"
-          role="img"
-          aria-label={`${fila.porcentaje ?? 0}% de las entregas a tiempo`}
-        >
-          <div
-            className="ranking__relleno"
-            style={{ width: `${fila.porcentaje ?? 0}%`, background: color }}
-          />
-        </div>
+      <span className="ranking__pct" style={{ color: porcentaje !== null ? color : undefined }}>
+        {porcentaje !== null ? `${porcentaje} %` : '—'}
+      </span>
 
-        <p className="ranking__meta">
-          <span className="ranking__punto ranking__punto--exito" aria-hidden />
-          {fila.entregas_a_tiempo} a tiempo
-          <span className="ranking__punto ranking__punto--alerta" aria-hidden />
-          {fila.entregas_tardias} {fila.entregas_tardias === 1 ? 'tardía' : 'tardías'}
-          {fila.calificacion_promedio !== null && <span>★ {fila.calificacion_promedio.toFixed(1)}</span>}
-          {fila.tiempo_promedio_min !== null && <span>{minutosLegibles(fila.tiempo_promedio_min)}</span>}
-        </p>
+      <div
+        className="ranking__pista"
+        role="img"
+        aria-label={`${porcentaje ?? 0} % de las entregas a tiempo; la meta es ${META} %`}
+      >
+        <div className="ranking__relleno" style={{ width: `${porcentaje ?? 0}%`, background: color }} />
+        <span className="ranking__meta90" aria-hidden />
       </div>
+
+      <p className="ranking__meta">
+        <span>{fila.entregas_a_tiempo} a tiempo</span>
+        <span>
+          {fila.entregas_tardias} {fila.entregas_tardias === 1 ? 'tardía' : 'tardías'}
+        </span>
+        {fila.calificacion_promedio !== null && <span>★ {fila.calificacion_promedio.toFixed(1)}</span>}
+        {fila.tiempo_promedio_min !== null && <span>{minutosLegibles(fila.tiempo_promedio_min)}</span>}
+      </p>
     </li>
   );
 }
@@ -102,8 +87,7 @@ export default function GraficoEficiencia({
         setDatos(filas);
         setEstado('listo');
       })
-      // Antes este catch dejaba la lista vacía, así que un fallo de red se veía
-      // idéntico a «todavía no hay entregas». Son cosas distintas.
+      // Un fallo de red no debe verse igual que «todavía no hay entregas».
       .catch(() => setEstado('error'));
   }, []);
 
@@ -127,19 +111,19 @@ export default function GraficoEficiencia({
     [datos],
   );
 
+  const resumen =
+    estado === 'listo' && datos.length > 0
+      ? `${datos.length === 1 ? '1 repartidor' : `${datos.length} repartidores`} · ${totalEntregas} ${
+          totalEntregas === 1 ? 'entrega' : 'entregas'
+        } en total`
+      : undefined;
+
   const tarjeta = (
     <Card>
-      {variante === 'panel' && (
-        <div style={{ marginBottom: 'var(--esp-4)' }}>
-          <h2>Eficiencia de repartidores</h2>
-          {estado === 'listo' && datos.length > 0 && (
-            <p className="page-header__subtitulo">
-              {datos.length === 1 ? '1 repartidor' : `${datos.length} repartidores`} ·{' '}
-              {totalEntregas} {totalEntregas === 1 ? 'entrega' : 'entregas'} en total
-            </p>
-          )}
-        </div>
-      )}
+      <div className="card__cabecera">
+        <h2>{variante === 'panel' ? 'Eficiencia' : 'De mejor a peor'}</h2>
+        {variante === 'pagina' && resumen && <span className="card__nota">{resumen}</span>}
+      </div>
 
       {estado === 'cargando' && <EstadoCarga filas={4} etiqueta="Cargando el informe…" />}
 
@@ -153,18 +137,24 @@ export default function GraficoEficiencia({
 
       {estado === 'listo' && ranking.length === 0 && (
         <EstadoVacio
-          icono="📈"
           titulo="Sin entregas registradas todavía"
           detalle="Aquí verás, de mejor a peor, qué proporción de entregas hace a tiempo cada repartidor."
         />
       )}
 
       {estado === 'listo' && ranking.length > 0 && (
-        <ol className="ranking">
-          {ranking.map((fila, i) => (
-            <FilaEficiencia key={fila.repartidor_id} fila={fila} posicion={i + 1} />
-          ))}
-        </ol>
+        <>
+          <ol className={`ranking${variante === 'pagina' ? ' ranking--pagina' : ''}`}>
+            {ranking.map((fila, i) => (
+              <FilaEficiencia key={fila.repartidor_id} fila={fila} posicion={i + 1} />
+            ))}
+          </ol>
+          <p className="ranking__clave">
+            <span>La marca vertical es la meta del {META} %.</span>
+            <span>En rojo, por debajo del {UMBRAL_AYUDA} %: necesita ayuda.</span>
+            {variante === 'panel' && resumen && <span>{resumen}</span>}
+          </p>
+        </>
       )}
     </Card>
   );

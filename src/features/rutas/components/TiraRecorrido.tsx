@@ -1,17 +1,9 @@
-import { Fragment } from 'react';
-
 export interface PuntoRecorrido {
   lat: number;
   lng: number;
   etiqueta: string;
   estado?: 'pendiente' | 'entregado' | 'fallido';
 }
-
-const COLOR: Record<string, string> = {
-  pendiente: 'var(--color-primario)',
-  entregado: 'var(--color-exito)',
-  fallido: 'var(--color-alerta)',
-};
 
 interface Lugar {
   clave: string;
@@ -20,6 +12,7 @@ interface Lugar {
   cuantas: number;
 }
 
+/** Varios pedidos al mismo punto son una sola parada: no hay camino entre ellos. */
 function porLugar(puntos: PuntoRecorrido[]): Lugar[] {
   const lugares: Lugar[] = [];
   puntos.forEach((p) => {
@@ -34,67 +27,34 @@ function porLugar(puntos: PuntoRecorrido[]): Lugar[] {
   return lugares;
 }
 
+/**
+ * El recorrido como una línea vertical de paradas numeradas: el mismo
+ * lenguaje que la lista de paradas de una ruta y la línea de tiempo de un
+ * pedido (cuadrados unidos por una regla).
+ */
 export default function TiraRecorrido({ puntos }: { puntos: PuntoRecorrido[] }) {
   const lugares = porLugar(puntos);
   if (lugares.length === 0) return null;
 
   return (
-    <div style={{ overflowX: 'auto', padding: '4px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', minWidth: 'min-content' }}>
-        {lugares.map((lugar, i) => (
-          <Fragment key={lugar.clave}>
-            {i > 0 && (
-              <div
-                aria-hidden
-                style={{
-                  flex: '1 1 24px',
-                  minWidth: 24,
-                  maxWidth: 96,
-                  height: 3,
-                  borderRadius: 2,
-                  background: 'var(--color-borde)',
-                  marginTop: 15,
-                }}
-              />
-            )}
-            <div style={{ width: 132, flex: '0 0 132px', textAlign: 'center' }}>
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  margin: '0 auto',
-                  borderRadius: '50%',
-                  background: COLOR[lugar.estado ?? 'pendiente'] ?? COLOR.pendiente,
-                  color: '#fff',
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  boxShadow: '0 0 0 3px #fff, 0 1px 4px rgba(0,0,0,.25)',
-                }}
-              >
-                {i + 1}
-              </div>
-              <p
-                style={{
-                  marginTop: 8,
-                  fontSize: 12,
-                  lineHeight: 1.35,
-                  color: 'var(--color-texto)',
-                  wordBreak: 'break-word',
-                }}
-              >
-                {lugar.etiqueta}
-              </p>
-              {lugar.cuantas > 1 && (
-                <p style={{ fontSize: 11, color: 'var(--color-texto-suave)', marginTop: 2 }}>
-                  {lugar.cuantas} pedidos aquí
-                </p>
-              )}
-            </div>
-          </Fragment>
-        ))}
-      </div>
-    </div>
+    <ol className="recorrido" aria-label="Recorrido, en orden de visita">
+      {lugares.map((lugar, i) => (
+        <li key={lugar.clave} className="recorrido__item">
+          <span
+            className={`recorrido__num${
+              lugar.estado === 'entregado' || lugar.estado === 'fallido'
+                ? ` recorrido__num--${lugar.estado}`
+                : ''
+            }`}
+          >
+            {i + 1}
+          </span>
+          <span className="recorrido__texto">
+            {lugar.etiqueta}
+            {lugar.cuantas > 1 && <small>{lugar.cuantas} pedidos aquí</small>}
+          </span>
+        </li>
+      ))}
+    </ol>
   );
 }

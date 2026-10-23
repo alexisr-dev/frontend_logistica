@@ -122,6 +122,10 @@ export default function UsuariosPage() {
       />
 
       <Card>
+        <div className="card__cabecera">
+          <h2>Cuentas</h2>
+          {!cargando && !error && <span className="card__nota">Página {pagina}</span>}
+        </div>
         <div className="rejilla" style={{ marginBottom: 'var(--esp-4)' }}>
           <Input
             type="search"
@@ -162,7 +166,6 @@ export default function UsuariosPage() {
           />
         ) : lista.length === 0 ? (
           <EstadoVacio
-            icono={hayFiltros ? '🔍' : '👥'}
             titulo={hayFiltros ? 'Ningún usuario coincide' : 'Todavía no hay usuarios'}
             detalle={
               hayFiltros
@@ -186,9 +189,10 @@ export default function UsuariosPage() {
             {lista.map((u) => (
               <Fila key={u.id} atenuada={!u.activo}>
                 <Celda etiqueta="Nombre">
-                  <Link to={`/usuarios/${u.id}`} className="btn btn--texto">
+                  <Link to={`/usuarios/${u.id}`} className="enlace-fila">
                     {u.nombre_completo}
                   </Link>
+                  {u.id === yo?.id && <span className="etiqueta etiqueta--tu">Tú</span>}
                 </Celda>
                 <Celda etiqueta="Correo">{u.email}</Celda>
                 <Celda etiqueta="Teléfono">{u.telefono || '—'}</Celda>

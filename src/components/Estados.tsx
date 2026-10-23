@@ -28,22 +28,18 @@ export function EstadoCarga({
   );
 }
 
+/** Vacío: un título, una frase y, si hay algo que hacer, la acción. Sin ilustración. */
 export function EstadoVacio({
-  icono = '📭',
   titulo,
   detalle,
   accion,
 }: {
-  icono?: string;
   titulo: string;
   detalle?: string;
   accion?: ReactNode;
 }) {
   return (
     <div className="estado">
-      <span className="estado__icono" aria-hidden>
-        {icono}
-      </span>
       <p className="estado__titulo">{titulo}</p>
       {detalle && <p className="estado__detalle">{detalle}</p>}
       {accion}
@@ -62,9 +58,6 @@ export function EstadoError({
 }) {
   return (
     <div className="estado" role="alert">
-      <span className="estado__icono" aria-hidden>
-        ⚠️
-      </span>
       <p className="estado__titulo">{titulo}</p>
       {detalle && <p className="estado__detalle">{detalle}</p>}
       {onReintentar && (

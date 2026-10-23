@@ -122,3 +122,39 @@ export function IconoOjoCerrado(props: Props) {
     </svg>
   );
 }
+
+export function IconoCheck(props: Props) {
+  return (
+    <svg {...base} strokeWidth={2.4} {...props}>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </svg>
+  );
+}
+
+export function IconoPendiente(props: Props) {
+  return (
+    <svg {...base} strokeWidth={2.2} {...props}>
+      <circle cx="12" cy="12" r="8" />
+    </svg>
+  );
+}
+
+export function IconoAlerta(props: Props) {
+  return (
+    <svg {...base} strokeWidth={2.2} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v6" />
+      <path d="M12 16.5v.5" />
+    </svg>
+  );
+}
+
+export function IconoInfo(props: Props) {
+  return (
+    <svg {...base} strokeWidth={2.2} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5" />
+      <path d="M12 7.5v.5" />
+    </svg>
+  );
+}

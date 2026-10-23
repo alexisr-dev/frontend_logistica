@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { pedidosApi } from '../services/pedidosApi';
 import { usuariosApi, direccionesApi } from '../../usuarios/services/usuariosApi';
 import type { Usuario, UbicacionSeleccionada } from '../../../types';
 import { Card, Campo, Input, Select, Boton, Aviso, PageHeader } from '../../../components/ui';
+import { IconoCheck, IconoPendiente } from '../../../components/Iconos';
 import { mensajeDeError } from '../../../utils/errores';
 import SelectorDireccion, { UBICACION_VACIA } from '../../usuarios/components/SelectorDireccion';
 
@@ -78,12 +79,24 @@ export default function PedidoForm() {
     }
   }
 
+  const nombreCliente = clientes.find((c) => String(c.id) === clienteId)?.nombre_completo;
+  const requisitos = [
+    { ok: Boolean(clienteId), texto: nombreCliente ? `Cliente: ${nombreCliente}` : 'Falta elegir el cliente' },
+    { ok: completa(origen), texto: completa(origen) ? 'Origen marcado' : 'Falta marcar el origen' },
+    { ok: completa(destino), texto: completa(destino) ? 'Destino marcado' : 'Falta marcar el destino' },
+  ];
+
   return (
     <form onSubmit={enviar} className="pila">
-      <PageHeader
-        titulo="Nuevo pedido"
-        subtitulo="Registra un envío: de quién es, qué lleva y entre qué dos direcciones va."
-      />
+      <div>
+        <Link to="/pedidos" className="volver">
+          ← Volver a pedidos
+        </Link>
+        <PageHeader
+          titulo="Nuevo pedido"
+          subtitulo="Registra un envío: de quién es, qué lleva y entre qué dos direcciones va."
+        />
+      </div>
 
       {error && <Aviso tono="error">{error}</Aviso>}
 
@@ -132,35 +145,57 @@ export default function PedidoForm() {
 
       <Card>
         <h2 style={{ marginBottom: 'var(--esp-1)' }}>De dónde sale y a dónde va</h2>
-        <p style={{ fontSize: 'var(--texto-sm)', color: 'var(--color-texto-suave)', marginBottom: 'var(--esp-5)' }}>
+        <p className="card__nota" style={{ marginBottom: 'var(--esp-5)' }}>
           Cada dirección se guarda con su texto y su punto en el mapa: el texto lo lee el
           repartidor, el punto es el que traza la ruta.
         </p>
         <div className="rejilla">
-          <SelectorDireccion
-            etiqueta="Dirección de origen"
-            titulo="Marca el origen en el mapa"
-            placeholder="Av. Javier Prado 123"
-            onChange={setOrigen}
-          />
-          <SelectorDireccion
-            etiqueta="Dirección de destino"
-            titulo="Marca el destino en el mapa"
-            placeholder="Av. Arequipa 456"
-            color="var(--color-alerta)"
-            onChange={setDestino}
-          />
+          <div className="punto">
+            <span className="punto__letra" aria-hidden>
+              A
+            </span>
+            <SelectorDireccion
+              etiqueta="Dirección de origen"
+              titulo="Marca el origen en el mapa"
+              placeholder="Av. Javier Prado 123"
+              letra="A"
+              onChange={setOrigen}
+            />
+          </div>
+          <div className="punto">
+            <span className="punto__letra punto__letra--destino" aria-hidden>
+              B
+            </span>
+            <SelectorDireccion
+              etiqueta="Dirección de destino"
+              titulo="Marca el destino en el mapa"
+              placeholder="Av. Arequipa 456"
+              letra="B"
+              destino
+              onChange={setDestino}
+            />
+          </div>
         </div>
       </Card>
 
-      <div className="barra-acciones">
-        <Boton type="button" variante="neutro" onClick={() => navigate('/pedidos')}>
-          Cancelar
-        </Boton>
-        <Boton type="submit" disabled={!listo || guardando}>
-          {guardando ? 'Creando…' : 'Crear pedido'}
-        </Boton>
-      </div>
+      <Card className="card--salidas cierre">
+        <ul className="requisitos" aria-label="Qué falta para crear el pedido">
+          {requisitos.map((r) => (
+            <li key={r.texto}>
+              {r.ok ? <IconoCheck aria-hidden /> : <IconoPendiente aria-hidden />}
+              {r.ok ? r.texto : <b>{r.texto}</b>}
+            </li>
+          ))}
+        </ul>
+        <div className="barra-acciones">
+          <Boton type="button" variante="neutro" onClick={() => navigate('/pedidos')}>
+            Cancelar
+          </Boton>
+          <Boton type="submit" disabled={!listo || guardando}>
+            {guardando ? 'Creando…' : 'Crear pedido'}
+          </Boton>
+        </div>
+      </Card>
     </form>
   );
 }

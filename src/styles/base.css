@@ -10,8 +10,11 @@
 body {
   background: var(--color-fondo);
   color: var(--color-texto);
+  font-family: var(--fuente);
   font-size: var(--texto-base);
   line-height: var(--alto-lectura);
+  /* Las horas y las cifras alinean en columna en toda la interfaz. */
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -26,39 +29,41 @@ button {
 }
 
 /* ── Jerarquía tipográfica ────────────────────────────────────────────
-   Una sola definición por nivel: antes convivían 14 tamaños distintos
-   repartidos por los componentes. */
+   Condensada (ancho 75 %) para títulos y cifras; ancho normal para leer. */
 h1 {
-  font-size: var(--texto-xl);
+  font-size: var(--texto-titulo);
   font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
   line-height: var(--alto-apretado);
+  letter-spacing: -0.005em;
+  text-wrap: balance;
 }
 
 h2 {
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-medio);
-  line-height: var(--alto-normal);
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-fuerte);
+  font-stretch: 75%;
+  line-height: 1.1;
 }
 
 h3 {
   font-size: var(--texto-md);
-  font-weight: var(--peso-medio);
+  font-weight: var(--peso-fuerte);
   line-height: var(--alto-normal);
 }
 
 /* ── Foco ─────────────────────────────────────────────────────────────
-   `:focus-visible` en vez de `:focus` para que el anillo aparezca al navegar
-   con teclado pero no al hacer clic con el ratón. */
+   `:focus-visible` para que el anillo aparezca al navegar con teclado pero
+   no al hacer clic. Tinta de 3 px: se ve sobre blanco y sobre amarillo. */
 :focus-visible {
   outline: var(--foco-ancho) solid var(--foco-color);
   outline-offset: 2px;
-  border-radius: var(--radio-sm);
+  border-radius: 0;
 }
 
-/* Sobre fondo primario el azul del anillo se pierde: se invierte. */
-.btn--primario:focus-visible,
-.menu__enlace:focus-visible,
-.menu__salir:focus-visible {
+/* Sobre la barra negra el anillo se invierte. */
+.barra :focus-visible,
+.dialogo__caja .btn--peligro:focus-visible {
   outline-color: var(--color-texto-inverso);
 }
 

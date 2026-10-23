@@ -1,51 +1,63 @@
+/*
+ * Dirección visual «Horario»: el cuadro de salidas de una estación.
+ * Amarillo = lo que todavía sale o se puede hacer; blanco = lo ya cerrado;
+ * tinta = texto, barra y reglas. El estado no vive en el matiz sino en la
+ * forma y la palabra (cuadrados que se llenan + nombre), así que sobran los
+ * diez colores de estado que había antes.
+ */
 :root {
   /* ── Color · acción ─────────────────────────────────────────────── */
-  --color-primario: #2563eb;
-  --color-primario-hover: #1d4ed8;
-  --color-primario-activo: #1e40af;
+  --color-amarillo: #ffd400;
+  --color-amarillo-hover: #ffe45c;
+  --color-tinta: #14130f;
+
+  /* «Lo principal» cuando hace falta un color de texto, línea o foco. */
+  --color-primario: #14130f;
+  --color-primario-hover: #34322c;
+  --color-primario-activo: #000000;
   /* Fondo de la opción seleccionada y de las filas marcadas. */
-  --color-primario-suave: #eff6ff;
+  --color-primario-suave: #fff3a6;
 
   /* ── Color · planos ─────────────────────────────────────────────── */
-  --color-fondo: #f1f5f9;
+  --color-fondo: #eef0f1;
   --color-superficie: #ffffff;
-  /* Segundo plano dentro de una tarjeta: explicadores, cabeceras de tabla. */
-  --color-superficie-alt: #f8fafc;
+  /* Segundo plano: cabeceras explicativas, hover de fila. */
+  --color-superficie-alt: #f5f6f7;
 
   /* ── Color · texto ──────────────────────────────────────────────── */
-  --color-texto: #0f172a;
-  --color-texto-suave: #64748b;
+  --color-texto: #14130f;
+  /* 9:1 sobre blanco. Nunca se atenúa con opacidad sobre amarillo. */
+  --color-texto-suave: #464b52;
+  /* 6:1 sobre blanco: ayudas y pies. */
+  --color-texto-tenue: #5c626a;
   --color-texto-inverso: #ffffff;
 
   /* ── Color · líneas ─────────────────────────────────────────────── */
-  --color-borde: #e2e8f0;
-  /* Borde de controles: necesita 3:1 contra el fondo para ser accesible. */
-  --color-borde-fuerte: #94a3b8;
+  --color-borde: #dadde0;
+  /* Borde de controles: 3:1 contra el fondo para ser accesible. */
+  --color-borde-fuerte: #8a9097;
 
   /* ── Color · estado ─────────────────────────────────────────────── */
-  --color-exito: #16a34a;
-  --color-alerta: #dc2626;
-  --color-aviso: #b45309;
-  --color-info: #0ea5e9;
+  --color-exito: #0a7b3c;
+  --color-alerta: #b00b27;
+  --color-aviso: #8a4b00;
+  --color-info: #464b52;
 
-  /* ── Color · marca (menú lateral y acceso) ──────────────────────── */
-  --color-marca-oscuro: #1e3a8a;
-  --color-marca-medio: #1e40af;
-  /* Borde del degradado nocturno de la pantalla de acceso. */
-  --color-marca-noche: #0a1440;
+  /* ── Color · marca (se mantienen los nombres antiguos) ──────────── */
+  --color-marca-oscuro: #14130f;
+  --color-marca-medio: #14130f;
+  --color-marca-noche: #14130f;
 
-  /* ── Color · roles de usuario ───────────────────────────────────── */
-  --color-rol-cliente: #0ea5e9;
-  --color-rol-repartidor: #8b5cf6;
-  --color-rol-admin: #1e3a8a;
+  /* ── Color · roles: el marcador cuadrado lleva la identidad ─────── */
+  --color-rol-cliente: #ffffff;
+  --color-rol-repartidor: #ffd400;
+  --color-rol-admin: #14130f;
 
-  /* ── Color · estados de pedido y de ruta ────────────────────────── */
-  --color-estado-pendiente: #f59e0b;
-  --color-estado-confirmado: #3b82f6;
-  --color-estado-preparacion: #8b5cf6;
-  --color-estado-camino: #0ea5e9;
-  --color-estado-planificada: #6366f1;
-  --color-estado-neutro: #64748b;
+  /* ── Color · marcadores de ruta y de otros estados ──────────────── */
+  --color-estado-pendiente: #ffffff;
+  --color-estado-camino: #ffd400;
+  --color-estado-planificada: #ffffff;
+  --color-estado-neutro: #b9bec3;
 
   /* ── Espaciado · base 4 ─────────────────────────────────────────── */
   --esp-1: 4px;
@@ -59,41 +71,51 @@
   --esp-12: 48px;
 
   /* ── Tipografía ─────────────────────────────────────────────────── */
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Archivo, de ancho variable: condensada solo donde hay cifras y
+     títulos (como el cuadro de salidas), normal para leer. */
+  --fuente: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--fuente);
 
-  --texto-xs: 12px;
-  --texto-sm: 13px;
+  --texto-xs: 12.5px;
+  --texto-sm: 13.5px;
   --texto-base: 14px;
   --texto-md: 16px;
   --texto-lg: 18px;
   --texto-xl: 24px;
-  --texto-dato: 32px;
+  --texto-dato: 40px;
+  --texto-titulo: 44px;
 
-  --alto-apretado: 1.25;
+  --alto-apretado: 1.05;
   --alto-normal: 1.4;
-  --alto-lectura: 1.55;
+  --alto-lectura: 1.5;
 
   --peso-normal: 400;
   --peso-medio: 600;
   --peso-fuerte: 700;
 
   /* ── Bordes y profundidad ───────────────────────────────────────── */
-  --radio-sm: 8px;   /* controles */
-  --radio: 12px;     /* tarjetas */
-  --radio-lg: 16px;  /* diálogos */
+  /* La interfaz es recta: 0 en la estructura, 4 px en controles. */
+  --radio-sm: 4px;
+  --radio: 0;
+  --radio-lg: 4px;
   --radio-full: 999px;
 
-  --sombra: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --sombra-flotante: 0 10px 25px rgba(15, 23, 42, 0.15);
+  /* Solo flota lo que de verdad flota: menús y diálogos. */
+  --sombra: none;
+  --sombra-flotante: 0 16px 40px rgba(0, 0, 0, 0.28);
 
   /* ── Foco ───────────────────────────────────────────────────────── */
-  --foco-ancho: 2px;
-  --foco-color: var(--color-primario);
+  --foco-ancho: 3px;
+  --foco-color: var(--color-tinta);
+
+  /* ── Movimiento ─────────────────────────────────────────────────── */
+  --ease-salida: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-hoja: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* ── Medidas de layout ──────────────────────────────────────────── */
-  --ancho-menu: 240px;
-  --ancho-menu-compacto: 72px;
-  --ancho-contenido: 1280px;
+  --alto-barra: 56px;
+  --ancho-contenido: 1360px;
+  --ancho-lateral: 400px;
   /* Mínimo táctil recomendado; se aplica en móvil. */
   --tactil-min: 44px;
 }
@@ -102,7 +124,6 @@
  * Puntos de ruptura (los @media no admiten variables, se documentan aquí y se
  * escriben literales en componentes.css):
  *   móvil      hasta 767px
- *   tablet     768px – 1023px
- *   portátil   1024px – 1365px
- *   escritorio 1366px en adelante
+ *   tablet     768px – 1099px
+ *   escritorio 1100px en adelante
  */

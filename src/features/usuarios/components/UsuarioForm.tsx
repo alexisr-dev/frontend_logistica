@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Aviso, Boton, Campo, Card, Input, InputClave, PageHeader, Select } from '../../../components/ui';
 import { EstadoCarga } from '../../../components/Estados';
 import { mensajeDeError } from '../../../utils/errores';
@@ -89,102 +89,116 @@ export default function UsuarioForm() {
 
   return (
     <div className="pila">
-      <PageHeader
-        titulo={titulo}
-        subtitulo={
-          editando
-            ? 'Cambia los datos de la cuenta o su nivel de acceso.'
-            : 'Crea una cuenta de cliente, repartidor o administrador.'
-        }
-      />
+      <div>
+        <Link to="/usuarios" className="volver">
+          ← Volver a usuarios
+        </Link>
+        <PageHeader
+          titulo={titulo}
+          subtitulo={
+            editando
+              ? 'Cambia los datos de la cuenta o su nivel de acceso.'
+              : 'Crea una cuenta de cliente, repartidor o administrador.'
+          }
+        />
+      </div>
 
       {error && <Aviso tono="error">{error}</Aviso>}
 
-      <Card>
-        <form onSubmit={onSubmit} className="pila">
-          <div className="rejilla">
-            <Campo etiqueta="Nombre">
-              <Input
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                autoComplete="given-name"
-                required
-              />
-            </Campo>
-            <Campo etiqueta="Apellido">
-              <Input
-                value={apellido}
-                onChange={(e) => setApellido(e.target.value)}
-                autoComplete="family-name"
-                required
-              />
-            </Campo>
+      <form onSubmit={onSubmit} className="pila">
+        <div className="columnas columnas--formulario">
+          <Card>
+            <h2 style={{ marginBottom: 'var(--esp-4)' }}>Datos de la persona</h2>
+            <div className="rejilla rejilla--2">
+              <Campo etiqueta="Nombre">
+                <Input
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  autoComplete="given-name"
+                  required
+                />
+              </Campo>
+              <Campo etiqueta="Apellido">
+                <Input
+                  value={apellido}
+                  onChange={(e) => setApellido(e.target.value)}
+                  autoComplete="family-name"
+                  required
+                />
+              </Campo>
 
-            <Campo etiqueta="Correo">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-              />
-            </Campo>
-            <Campo etiqueta="Teléfono">
-              <Input
-                type="tel"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                autoComplete="tel"
-              />
-            </Campo>
+              <Campo etiqueta="Correo">
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </Campo>
+              <Campo etiqueta="Teléfono">
+                <Input
+                  type="tel"
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  autoComplete="tel"
+                />
+              </Campo>
+            </div>
+          </Card>
 
-            <Campo etiqueta="Rol" ayuda="Al elegir repartidor se le crea su perfil automáticamente.">
-              <Select value={rol} onChange={(e) => setRol(e.target.value as Rol)}>
-                {ROLES.map((o) => (
-                  <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
-                ))}
-              </Select>
-            </Campo>
+          <Card className="card--salidas">
+            <h2 style={{ marginBottom: 'var(--esp-4)' }}>Acceso</h2>
+            <div className="pila" style={{ gap: 'var(--esp-5)' }}>
+              <Campo etiqueta="Rol" ayuda="Al elegir repartidor se le crea su perfil automáticamente.">
+                <Select value={rol} onChange={(e) => setRol(e.target.value as Rol)}>
+                  {ROLES.map((o) => (
+                    <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
+                  ))}
+                </Select>
+              </Campo>
 
-            <Campo
-              etiqueta="Contraseña"
-              ayuda={
-                editando
-                  ? 'Déjala en blanco para no cambiarla.'
-                  : 'Mínimo 8 caracteres. No puede ser solo números ni una clave común.'
-              }
-            >
-              <InputClave
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                required={!editando}
-              />
-            </Campo>
-          </div>
+              <Campo
+                etiqueta="Contraseña"
+                ayuda={
+                  editando
+                    ? 'Déjala en blanco para no cambiarla.'
+                    : 'Mínimo 8 caracteres. No puede ser solo números ni una clave común.'
+                }
+              >
+                <InputClave
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  required={!editando}
+                />
+              </Campo>
 
-          <label className="campo" style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <input
-              type="checkbox"
-              checked={activo}
-              onChange={(e) => setActivo(e.target.checked)}
-            />
-            <span className="campo__etiqueta">
-              Cuenta activa
-              <span className="campo__ayuda"> — si se desmarca, no podrá iniciar sesión.</span>
-            </span>
-          </label>
+              <label className="interruptor">
+                <input
+                  type="checkbox"
+                  checked={activo}
+                  onChange={(e) => setActivo(e.target.checked)}
+                />
+                <span className="interruptor__pista" aria-hidden />
+                <span className="interruptor__texto">
+                  <span className="campo__etiqueta">Cuenta activa</span>
+                  <span className="campo__ayuda">Si se desactiva, no podrá iniciar sesión.</span>
+                </span>
+              </label>
+            </div>
+          </Card>
+        </div>
 
-          <div className="barra-acciones">
-            <Boton type="button" variante="neutro" onClick={() => navigate('/usuarios')}>
-              Cancelar
-            </Boton>
-            <Boton type="submit" disabled={!listo || guardando}>
-              {guardando ? 'Guardando…' : editando ? 'Guardar cambios' : 'Crear usuario'}
-            </Boton>
-          </div>
-        </form>
-      </Card>
+        <div className="barra-acciones barra-acciones--fin">
+          <Boton type="button" variante="neutro" onClick={() => navigate('/usuarios')}>
+            Cancelar
+          </Boton>
+          <Boton type="submit" disabled={!listo || guardando}>
+            {guardando ? 'Guardando…' : editando ? 'Guardar cambios' : 'Crear usuario'}
+          </Boton>
+        </div>
+      </form>
     </div>
   );
 }

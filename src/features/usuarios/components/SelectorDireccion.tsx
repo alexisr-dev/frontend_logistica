@@ -18,12 +18,16 @@ export default function SelectorDireccion({
   onChange,
   placeholder,
   color = 'var(--color-primario)',
+  letra,
+  destino,
 }: {
   etiqueta: string;
   titulo: string;
   onChange: (ubicacion: UbicacionSeleccionada) => void;
   placeholder?: string;
   color?: string;
+  letra?: string;
+  destino?: boolean;
 }) {
   const [ubicacion, setUbicacion] = useState<UbicacionSeleccionada>(UBICACION_VACIA);
   const [vista, setVista] = useState<{ lat: number; lng: number } | null>(null);
@@ -153,8 +157,7 @@ export default function SelectorDireccion({
         <ul
           style={{
             listStyle: 'none',
-            border: '1px solid var(--color-borde)',
-            borderRadius: 8,
+            boxShadow: 'inset 0 0 0 1px var(--color-borde-fuerte)',
             overflow: 'hidden',
           }}
         >
@@ -173,26 +176,32 @@ export default function SelectorDireccion({
                   fontFamily: 'inherit',
                 }}
               >
-                <span style={{ fontSize: 13, fontWeight: 600 }}>{s.calle}</span>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>{s.calle}</span>
                 <br />
-                <span style={{ fontSize: 12, color: 'var(--color-texto-suave)' }}>{s.descripcion}</span>
+                <span style={{ fontSize: 13, color: 'var(--color-texto-suave)' }}>{s.descripcion}</span>
               </button>
             </li>
           ))}
         </ul>
       )}
 
-      {aviso && <span style={{ fontSize: 12, color: 'var(--color-aviso)' }}>{aviso}</span>}
+      {aviso && (
+        <span role="status" style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-aviso)' }}>
+          {aviso}
+        </span>
+      )}
 
       <SelectorUbicacion
         titulo={titulo}
         punto={punto}
         vista={vista}
         color={color}
+        letra={letra}
+        destino={destino}
         onElegir={marcarEnMapa}
       />
 
-      <span style={{ fontSize: 12, color: 'var(--color-texto-suave)' }}>
+      <span style={{ fontSize: 13, color: 'var(--color-texto-suave)' }}>
         {ocupado === 'resolviendo'
           ? 'Obteniendo la dirección de ese punto…'
           : resumen && `Se guardará: ${resumen}`}

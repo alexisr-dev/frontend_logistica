@@ -1,6 +1,6 @@
 import { cloneElement, forwardRef, isValidElement, useId, useState } from 'react';
 import type { ReactNode, CSSProperties, ReactElement } from 'react';
-import { IconoOjo, IconoOjoCerrado } from './Iconos';
+import { IconoAlerta, IconoCheck, IconoInfo, IconoOjo, IconoOjoCerrado } from './Iconos';
 
 function clases(...partes: (string | false | undefined)[]): string {
   return partes.filter(Boolean).join(' ');
@@ -52,14 +52,21 @@ export function Badge({ color, children }: { color: string; children: ReactNode 
   );
 }
 
+/**
+ * Cuántos de los cinco cuadrados van llenos en cada estado de un pedido.
+ * El estado se lee por la forma y por la palabra, no por el matiz.
+ */
+const NIVEL_PEDIDO: Record<string, number> = {
+  pendiente: 1,
+  confirmado: 2,
+  en_preparacion: 3,
+  en_camino: 4,
+  entregado: 5,
+  devuelto: 4,
+};
+
+/** Marcador de los estados que no son de pedido: ruta, parada, rol, cuenta. */
 const TOKEN_ESTADO: Record<string, string> = {
-  pendiente: '--color-estado-pendiente',
-  confirmado: '--color-estado-confirmado',
-  en_preparacion: '--color-estado-preparacion',
-  en_camino: '--color-estado-camino',
-  entregado: '--color-exito',
-  cancelado: '--color-alerta',
-  devuelto: '--color-estado-neutro',
   planificada: '--color-estado-planificada',
   en_curso: '--color-estado-camino',
   finalizada: '--color-exito',
@@ -72,7 +79,43 @@ const TOKEN_ESTADO: Record<string, string> = {
   inactivo: '--color-alerta',
 };
 
-export function BadgeEstado({ codigo, nombre }: { codigo: string; nombre: string }) {
+export function BadgeEstado({
+  codigo,
+  nombre,
+  grande = false,
+}: {
+  codigo: string;
+  nombre: string;
+  grande?: boolean;
+}) {
+  const nivel = NIVEL_PEDIDO[codigo];
+  const tamano = grande ? ' estado-pedido--grande' : '';
+
+  if (codigo === 'cancelado') {
+    return (
+      <span className={`estado-pedido estado-pedido--cancelado${tamano}`}>
+        <span className="estado-pedido__x" aria-hidden>
+          ×
+        </span>
+        {nombre}
+      </span>
+    );
+  }
+
+  if (nivel !== undefined) {
+    const entregado = codigo === 'entregado';
+    return (
+      <span className={`estado-pedido${tamano}`}>
+        <span className={`cuadros${entregado ? ' cuadros--ok' : ''}`} aria-hidden>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <i key={n} className={n <= nivel ? 'on' : undefined} />
+          ))}
+        </span>
+        {nombre}
+      </span>
+    );
+  }
+
   const token = TOKEN_ESTADO[codigo] ?? '--color-estado-neutro';
   return <Badge color={`var(${token})`}>{nombre}</Badge>;
 }
@@ -178,9 +221,11 @@ export function Aviso({
   tono: 'error' | 'exito' | 'atencion';
   children: ReactNode;
 }) {
+  const Icono = tono === 'exito' ? IconoCheck : tono === 'error' ? IconoAlerta : IconoInfo;
   return (
     <p className={`aviso aviso--${tono}`} role={tono === 'error' ? 'alert' : undefined}>
-      {children}
+      <Icono aria-hidden />
+      <span>{children}</span>
     </p>
   );
 }
